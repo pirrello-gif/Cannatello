@@ -395,7 +395,7 @@ const ROSTER   = new Set([
 
 
 
-const EA_BASE = '/api/proxy';
+// API chiamata direttamente dal browser
 
 let allMatches    = [];
 let memberStats   = {};
@@ -430,13 +430,23 @@ async function loadAll() {
   }
 }
 
-// ── FETCH EA API via Vercel Proxy ─────────────────────────────────────────
+// ── FETCH — prova proclubs.ea.com diretto, fallback su corsproxy ──────────
 async function fetchEA(path) {
-  // Chiama /api/proxy?path=... che a sua volta chiama proclubs.ea.com dal server
-  const url = `${EA_BASE}?path=${encodeURIComponent(path)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`API error ${res.status} su ${path}`);
-  return res.json();
+  const eaUrl = `https://proclubs.ea.com/api/fc${path}`;
+  // prova diretta (funziona se il browser ha già i cookie EA)
+  try {
+    const r1 = await fetch(eaUrl, {
+      credentials: 'include',
+      headers: { 'Accept': 'application/json', 'Referer': 'https://www.ea.com/' }
+    });
+    if (r1.ok) return r1.json();
+  } catch(_) {}
+
+  // fallback: corsproxy.io (proxy CORS pubblico, non richiede auth)
+  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(eaUrl)}`;
+  const r2 = await fetch(proxyUrl);
+  if (!r2.ok) throw new Error(`EA API non raggiungibile (${r2.status})`);
+  return r2.json();
 }
 
 // ── PARSERS ───────────────────────────────────────────────────────────────
@@ -815,13 +825,8 @@ function showError(msg) {
   b.innerHTML = `
     <strong>⚠️ Impossibile caricare i dati EA Sports</strong><br>
     ${msg}<br><br>
-    <strong>Soluzione:</strong> Questa web app deve essere hostata su un dominio con accesso a
-    <code>proclubs.ea.com</code>. In locale, il browser blocca le richieste cross-origin.<br>
-    Pubblica su <a href="https://firebase.google.com/docs/hosting" target="_blank"
-    style="color:var(--gold)">Firebase Hosting</a> o
-    <a href="https://vercel.com" target="_blank" style="color:var(--gold)">Vercel</a> e funzionerà.
-    <br><br>
-    <em>In alternativa, usa l'estensione Chrome per aggirare il limite CORS.</em>`;
+    <strong>Dettaglio errore:</strong> ${msg}<br><br>
+    Ricarica la pagina — se persiste, l'API EA potrebbe essere temporaneamente non disponibile.`;
   b.classList.add('show');
   show('dashboard');
 }
