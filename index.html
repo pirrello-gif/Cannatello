@@ -7,32 +7,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--navy:#0a1628;--blue:#0f2040;--gold:#e8b923;--gold3:rgba(232,185,35,.12);--white:#f0f4ff;--text:#a8c0e0;--mid:#5a7090;--dim:#2a3f60;--card:#0d1e3a;--card2:#111f3c;--green:#16a34a;--green2:rgba(22,163,74,.15);--red:#dc2626;--red2:rgba(220,38,38,.15);--amber:#d97706;--border:rgba(255,255,255,.06)}
+:root{--navy:#0d0d0d;--blue:#141414;--gold:#00f57a;--gold3:rgba(0,245,122,.1);--white:#f5f5f5;--text:#9aaab4;--mid:#4a5568;--dim:#1e2a22;--card:#111111;--card2:#181818;--green:#00f57a;--green2:rgba(0,245,122,.12);--red:#f5365c;--red2:rgba(245,54,92,.15);--amber:#f59e0b;--border:rgba(255,255,255,.07)}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
-body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(10,22,40,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:12px}
+body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-height:100vh;overflow-x:hidden;background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(0,245,122,.06) 0%,transparent 60%)}
+.topbar{position:sticky;top:0;z-index:100;background:#0d0d0d;backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,245,122,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.brand-icon{width:32px;height:32px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.brand-name{font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:var(--gold);letter-spacing:2px;white-space:nowrap}
+.brand-icon{width:32px;height:32px;background:var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(0,245,122,.4)}
+.brand-name{font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:#00f57a;letter-spacing:2px;white-space:nowrap;text-shadow:0 0 20px rgba(0,245,122,.35)}
 .brand-tag{font-size:9px;color:var(--mid);letter-spacing:1px;white-space:nowrap}
 .nav{display:flex;gap:2px;overflow-x:auto}.nav::-webkit-scrollbar{display:none}
 .nb{padding:5px 12px;border-radius:16px;border:none;background:transparent;color:var(--mid);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow';white-space:nowrap;transition:all .2s}
-.nb:hover{color:var(--white)}.nb.active{background:var(--gold);color:var(--navy)}
+.nb:hover{color:var(--white)}.nb.active{background:#00f57a;color:#0d0d0d;box-shadow:0 0 10px rgba(0,245,122,.3)}
 .sbadge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mid);flex-shrink:0}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.dot{width:6px;height:6px;border-radius:50%;background:#00f57a;animation:pulse 2s infinite;box-shadow:0 0 6px rgba(0,245,122,.6)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
 .view{display:none;padding:20px;max-width:1200px;margin:0 auto}.view.active{display:block}
 #loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:70vh;gap:14px}
-.spin{width:40px;height:40px;border:3px solid var(--dim);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+.spin{width:40px;height:40px;border:3px solid var(--dim);border-top-color:#00f57a;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}.spin-text{font-size:12px;color:var(--mid)}
 .ebox{background:var(--red2);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:12px;color:#fca5a5;line-height:1.7;display:none}.ebox.show{display:block}
 .sr{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
-.st{font-family:'Barlow Condensed';font-size:20px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase}
+.st{font-family:'Barlow Condensed';font-size:20px;font-weight:800;color:#00f57a;letter-spacing:1.5px;text-transform:uppercase}
 .ss{font-size:11px;color:var(--mid)}
 .kstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:20px}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;transition:transform .2s}.kpi:hover{transform:translateY(-2px)}
-.kpi::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);opacity:.5}
-.kv{font-family:'Barlow Condensed';font-size:30px;font-weight:900;color:var(--gold);line-height:1}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;transition:transform .2s}.kpi:hover{transform:translateY(-2px);border-color:rgba(0,245,122,.3)}
+.kpi::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#00f57a;opacity:.6}
+.kv{font-family:'Barlow Condensed';font-size:30px;font-weight:900;color:#00f57a;line-height:1}
 .kl{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
 .ks{font-size:11px;color:var(--text);margin-top:2px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
@@ -43,7 +43,7 @@ body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--text);mi
 .cc canvas{max-height:200px}
 .mlist{display:flex;flex-direction:column;gap:6px}
 .mr{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .18s}
-.mr:hover{border-color:var(--gold);transform:translateX(3px);background:var(--card2)}
+.mr:hover{border-color:#00f57a;transform:translateX(3px);background:var(--card2)}
 .rb{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:#fff;flex-shrink:0}
 .rb.W{background:var(--green)}.rb.L{background:var(--red)}.rb.D{background:var(--amber)}
 .mi{flex:1;min-width:0}.miopp{font-size:14px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -52,9 +52,9 @@ body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--text);mi
 .tpill{font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(--border);color:var(--mid);flex-shrink:0}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
 .pc{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
-.pc:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,.5)}
-.pch{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--blue),var(--card))}
-.pcname{font-family:'Barlow Condensed';font-size:22px;font-weight:900;color:var(--gold);letter-spacing:.5px}
+.pc:hover{border-color:#00f57a;transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,.5),0 0 20px rgba(0,245,122,.08)}
+.pch{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#111,#0d0d0d)}
+.pcname{font-family:'Barlow Condensed';font-size:22px;font-weight:900;color:#00f57a;letter-spacing:.5px}
 .pcpos{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 .pcr{font-family:'Barlow Condensed';font-size:40px;font-weight:900;line-height:1}
 .pcb{padding:14px 16px}
@@ -69,52 +69,52 @@ body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--text);mi
 .pbf{height:100%;border-radius:3px;transition:width .6s ease}
 .pbv{font-size:10px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
 .pc-tier{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:10px;margin-top:8px;display:inline-block}
-.tier-S{background:rgba(232,185,35,.2);color:var(--gold)}
-.tier-A{background:rgba(22,163,74,.2);color:#4ade80}
+.tier-S{background:rgba(0,245,122,.15);color:#00f57a}
+.tier-A{background:rgba(22,163,74,.2);color:#00f57a}
 .tier-B{background:rgba(96,165,250,.2);color:#60a5fa}
 .tier-C{background:rgba(217,119,6,.2);color:#fbbf24}
-.tier-D{background:rgba(220,38,38,.2);color:#f87171}
+.tier-D{background:rgba(220,38,38,.2);color:#f5365c}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:16px}
 .overlay.open{display:flex}
 .modal{background:var(--blue);border:1px solid var(--border);border-radius:16px;width:100%;max-width:860px;max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.8)}
-.mh{background:var(--navy);padding:16px 20px;border-bottom:2px solid var(--gold);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.mh h2{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:var(--gold);letter-spacing:1px}
+.mh{background:#0d0d0d;padding:16px 20px;border-bottom:2px solid #00f57a;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.mh h2{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:#00f57a;letter-spacing:1px}
 .mcbtn{background:none;border:none;color:var(--mid);font-size:22px;cursor:pointer;line-height:1}.mcbtn:hover{color:var(--white)}
 .mb{padding:20px}
 .abox{border-radius:10px;padding:12px 14px}
 .abox.str{background:var(--green2);border:1px solid rgba(22,163,74,.3)}
 .abox.weak{background:var(--red2);border:1px solid rgba(220,38,38,.3)}
 .abox h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.abox.str h4{color:#4ade80}.abox.weak h4{color:#f87171}
+.abox.str h4{color:#00f57a}.abox.weak h4{color:#f5365c}
 .abox ul{list-style:none;display:flex;flex-direction:column;gap:5px}
 .abox li{font-size:12px;color:var(--text);display:flex;align-items:flex-start;gap:6px;line-height:1.5}
 .abox li::before{content:'▸';flex-shrink:0}
-.abox.str li::before{color:#4ade80}.abox.weak li::before{color:#f87171}
+.abox.str li::before{color:#00f57a}.abox.weak li::before{color:#f5365c}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{background:var(--navy);color:var(--mid);font-size:9px;text-transform:uppercase;letter-spacing:.6px;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:700}
 .tbl th.r{text-align:right}.tbl td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text)}.tbl td.r{text-align:right}
-.tbl tr:hover td{background:rgba(232,185,35,.04)}.tbl tr.motm td{background:rgba(232,185,35,.08)}
-.hi{color:#4ade80;font-weight:700}.me{color:var(--gold);font-weight:700}.lo{color:#f87171;font-weight:700}
+.tbl tr:hover td{background:rgba(232,185,35,.04)}.tbl tr.motm td{background:rgba(0,245,122,.06)}
+.hi{color:#00f57a;font-weight:700}.me{color:#00f57a;font-weight:700}.lo{color:#f5365c;font-weight:700}
 .fstrip{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px}
 .fd{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-size:13px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0}
 .fd.W{background:var(--green)}.fd.L{background:var(--red)}.fd.D{background:var(--amber)}
 .lb{display:flex;flex-direction:column;gap:5px}
 .lbr{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;transition:all .18s}
-.lbr:hover{border-color:var(--gold)}
+.lbr:hover{border-color:#00f57a}
 .lbrank{font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:var(--dim);width:24px;flex-shrink:0}
-.lbrank.t{color:var(--gold)}.lbname{flex:1;font-size:13px;font-weight:700;color:var(--white)}
-.lbval{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:var(--gold)}
+.lbrank.t{color:#00f57a}.lbname{flex:1;font-size:13px;font-weight:700;color:var(--white)}
+.lbval{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:#00f57a}
 .lbsub{font-size:10px;color:var(--mid);text-align:right}
 .fbar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .fb{padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);font-size:11px;font-weight:600;cursor:pointer;font-family:'Barlow';transition:all .2s}
-.fb:hover{border-color:var(--gold);color:var(--gold)}.fb.active{background:var(--gold3);border-color:var(--gold);color:var(--gold)}
+.fb:hover{border-color:#00f57a;color:#00f57a}.fb.active{background:rgba(0,245,122,.1);border-color:#00f57a;color:#00f57a}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
 .srl{font-size:11px;color:var(--mid)}.srv{font-size:13px;font-weight:700}.srs{font-size:9px;color:var(--mid)}
 .ministat{background:var(--navy);border-radius:8px;padding:10px;text-align:center}
 .msv{font-family:'Barlow Condensed';font-size:24px;font-weight:900;color:var(--white)}
 .msl{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.5px}
 .verdict{border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:12px;line-height:1.7}
-.verdict.S{background:rgba(232,185,35,.12);border:1px solid rgba(232,185,35,.3)}
+.verdict.S{background:rgba(0,245,122,.1);border:1px solid rgba(0,245,122,.25)}
 .verdict.A{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3)}
 .verdict.B{background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3)}
 .verdict.C{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3)}
@@ -257,7 +257,7 @@ async function init(){
     const b=document.getElementById('ebox');
     b.innerHTML='<strong>⚠️ API non raggiungibile</strong><br>'+e.message;
     b.classList.add('show'); show('dash');
-    document.getElementById('dot').style.background='#dc2626';
+    document.getElementById('dot').style.background='#f5365c';
   }
 }
 
@@ -383,13 +383,13 @@ function renderCharts(){
   const labs=s.map(m=>'vs '+m.opp.slice(0,9));
   const ax={ticks:{color:'#5a7090',font:{size:8}},grid:{color:'rgba(255,255,255,.04)'}};
   const leg={labels:{color:'#5a7090',font:{size:9},boxWidth:8}};
-  dc('cGoals');CHARTS.g=new Chart(document.getElementById('cGoals'),{type:'bar',data:{labels:labs,datasets:[{label:'Segnati',data:s.map(m=>m.gf),backgroundColor:'#16a34a',borderRadius:3},{label:'Subiti',data:s.map(m=>m.ga),backgroundColor:'#dc2626',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg},scales:{x:ax,y:{...ax,beginAtZero:true}}}});
-  dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',data:{labels:labs,datasets:[{label:'Rating',data:s.map(m=>+(m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1)).toFixed(2)),borderColor:'#e8b923',backgroundColor:'rgba(232,185,35,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#e8b923'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:4,max:10}}}});
+  dc('cGoals');CHARTS.g=new Chart(document.getElementById('cGoals'),{type:'bar',data:{labels:labs,datasets:[{label:'Segnati',data:s.map(m=>m.gf),backgroundColor:'#00c463',borderRadius:3},{label:'Subiti',data:s.map(m=>m.ga),backgroundColor:'#f5365c',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg},scales:{x:ax,y:{...ax,beginAtZero:true}}}});
+  dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',data:{labels:labs,datasets:[{label:'Rating',data:s.map(m=>+(m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1)).toFixed(2)),borderColor:'#00f57a',backgroundColor:'rgba(0,245,122,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#00f57a'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:4,max:10}}}});
   const t8=Object.values(MS).sort((a,b)=>b.ga-a.ga).slice(0,8);
-  dc('cGA');CHARTS.ga=new Chart(document.getElementById('cGA'),{type:'bar',data:{labels:t8.map(p=>p.name),datasets:[{label:'Gol',data:t8.map(p=>p.goals),backgroundColor:'#16a34a',borderRadius:3},{label:'Assist',data:t8.map(p=>p.assists),backgroundColor:'#1d4ed8',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:leg},scales:{x:{...ax,stacked:true},y:{...ax,stacked:true}}}});
+  dc('cGA');CHARTS.ga=new Chart(document.getElementById('cGA'),{type:'bar',data:{labels:t8.map(p=>p.name),datasets:[{label:'Gol',data:t8.map(p=>p.goals),backgroundColor:'#00c463',borderRadius:3},{label:'Assist',data:t8.map(p=>p.assists),backgroundColor:'#1d4ed8',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:leg},scales:{x:{...ax,stacked:true},y:{...ax,stacked:true}}}});
   dc('cShot');CHARTS.sh=new Chart(document.getElementById('cShot'),{type:'line',data:{labels:labs,datasets:[{label:'Conv%',data:s.map(m=>m.shotConv),borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#60a5fa'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:0,max:100}}}});
   const W=AM.filter(m=>m.res==='W').length,L=AM.filter(m=>m.res==='L').length,D2=AM.filter(m=>m.res==='D').length;
-  dc('cPie');CHARTS.pie=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{data:[W,D2,L],backgroundColor:['#16a34a','#d97706','#dc2626'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg}}});
+  dc('cPie');CHARTS.pie=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{data:[W,D2,L],backgroundColor:['#00c463','#d97706','#f5365c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg}}});
   const ts8=Object.values(MS).filter(p=>p.apps>=3).sort((a,b)=>b.avgShots-a.avgShots).slice(0,8);
   dc('cShots');CHARTS.shots=new Chart(document.getElementById('cShots'),{type:'bar',data:{labels:ts8.map(p=>p.name),datasets:[{label:'Tiri/gara',data:ts8.map(p=>+p.avgShots.toFixed(1)),backgroundColor:'#7c3aed',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:ax,y:ax}}});
 }
@@ -436,7 +436,7 @@ function applyPF(){
     +pb('Pass%',p.passPct,100,'#60a5fa',true)
     +pb('Drib/gara',p.avgDrib.toFixed(1),20,'#f59e0b',false)
     +pb('Intercetti',p.avgInt.toFixed(1),6,'#34d399',false)
-    +pb('G+A/90m',p.ga90.toFixed(2),2,'#e8b923',false)
+    +pb('G+A/90m',p.ga90.toFixed(2),2,'#00f57a',false)
     +'</div></div></div>';
   }).join('');
 }
@@ -478,12 +478,12 @@ function renderReport(){
   const W=AM.filter(m=>m.res==='W').length;
   document.getElementById('reportContent').innerHTML=
     '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">'
-    +'<div style="font-family:\'Barlow Condensed\';font-size:24px;font-weight:900;color:var(--gold);margin-bottom:4px">📋 ANALISI STAGIONE — FC CANNATELLO</div>'
+    +'<div style="font-family:\'Barlow Condensed\';font-size:24px;font-weight:900;color:#00f57a;margin-bottom:4px">📋 ANALISI STAGIONE — FC CANNATELLO</div>'
     +'<div style="font-size:11px;color:var(--mid)">Generato automaticamente · '+new Date().toLocaleDateString('it-IT')+'</div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">'
-    +rpBox('🏆 Best Player',best?.name||'—','Rating medio '+best?.avgR.toFixed(2),'#e8b923')
-    +rpBox('⚽ Top Scorer',scorer?.name||'—',scorer?.goals+' gol stagionali','#4ade80')
+    +rpBox('🏆 Best Player',best?.name||'—','Rating medio '+best?.avgR.toFixed(2),'#00f57a')
+    +rpBox('⚽ Top Scorer',scorer?.name||'—',scorer?.goals+' gol stagionali','#00f57a')
     +rpBox('🎯 Top Assister',assister?.name||'—',assister?.assists+' assist stagionali','#60a5fa')
     +rpBox('🏅 MOM King',momKing?.name||'—',momKing?.motm+' premi Man of Match','#a78bfa')
     +rpBox('📐 Più Costante',consistent?.name||'—','Dev. std. '+consistent?.cons.toFixed(2),'#34d399')
@@ -492,20 +492,20 @@ function renderReport(){
     +'<div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px;font-weight:700">Analisi collettiva</div>'
     +'<div style="font-size:13px;color:var(--text);line-height:1.9">'
     +'In questa stagione FC Cannatello ha disputato <strong style="color:var(--white)">'+AM.length+' partite</strong>, '
-    +'ottenendo <strong style="color:#4ade80">'+W+' vittorie</strong> (win rate <strong style="color:var(--white)">'+Math.round(W/n*100)+'%</strong>). '
+    +'ottenendo <strong style="color:#00f57a">'+W+' vittorie</strong> (win rate <strong style="color:var(--white)">'+Math.round(W/n*100)+'%</strong>). '
     +'Il team ha segnato una media di <strong style="color:var(--white)">'+(AM.reduce((s,m)=>s+m.gf,0)/n).toFixed(1)+' gol a partita</strong> '
     +'subendone <strong style="color:var(--white)">'+(AM.reduce((s,m)=>s+m.ga,0)/n).toFixed(1)+'</strong>. '
-    +'Il rating medio di squadra si attesta su <strong style="color:var(--gold)">'+(AM.reduce((s,m)=>s+m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1),0)/n).toFixed(2)+'</strong>. '
-    +'<strong style="color:var(--gold)">'+best?.name+'</strong> si conferma il giocatore più continuo con un rating di <strong>'+best?.avgR.toFixed(2)+'</strong>, '
-    +'mentre <strong style="color:var(--gold)">'+scorer?.name+'</strong> guida la classifica marcatori con <strong>'+scorer?.goals+' reti</strong>. '
-    +'La fase difensiva ha tenuto a zero in <strong style="color:#4ade80">'+AM.filter(m=>m.ga===0).length+' occasioni</strong> su '+AM.length+'.'
+    +'Il rating medio di squadra si attesta su <strong style="color:#00f57a">'+(AM.reduce((s,m)=>s+m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1),0)/n).toFixed(2)+'</strong>. '
+    +'<strong style="color:#00f57a">'+best?.name+'</strong> si conferma il giocatore più continuo con un rating di <strong>'+best?.avgR.toFixed(2)+'</strong>, '
+    +'mentre <strong style="color:#00f57a">'+scorer?.name+'</strong> guida la classifica marcatori con <strong>'+scorer?.goals+' reti</strong>. '
+    +'La fase difensiva ha tenuto a zero in <strong style="color:#00f57a">'+AM.filter(m=>m.ga===0).length+' occasioni</strong> su '+AM.length+'.'
     +'</div></div>'
     +'<div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;font-weight:700">Valutazioni individuali</div>'
     +'<div style="display:flex;flex-direction:column;gap:8px">'
     +Object.values(MS).sort((a,b)=>b.avgR-a.avgR).map(p=>{
       const an=analyzeP(p);
-      return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer" onclick="openPlayer(\''+p.name+'\')"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div><span style="font-family:\'Barlow Condensed\';font-size:18px;font-weight:900;color:var(--gold)">'+p.name+'</span> <span style="font-size:10px;color:var(--mid)">'+( PLFULL[p.pos]||'—')+' · '+p.apps+' pres.</span></div>'
-      +'<div style="display:flex;align-items:center;gap:8px"><span class="pc-tier tier-'+p.tier+'">'+tierLabel(p.tier)+'</span><span style="font-family:\'Barlow Condensed\';font-size:26px;font-weight:900;color:var(--gold)">'+p.avgR.toFixed(1)+'</span></div></div>'
+      return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer" onclick="openPlayer(\''+p.name+'\')"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div><span style="font-family:\'Barlow Condensed\';font-size:18px;font-weight:900;color:#00f57a">'+p.name+'</span> <span style="font-size:10px;color:var(--mid)">'+( PLFULL[p.pos]||'—')+' · '+p.apps+' pres.</span></div>'
+      +'<div style="display:flex;align-items:center;gap:8px"><span class="pc-tier tier-'+p.tier+'">'+tierLabel(p.tier)+'</span><span style="font-family:\'Barlow Condensed\';font-size:26px;font-weight:900;color:#00f57a">'+p.avgR.toFixed(1)+'</span></div></div>'
       +'<div style="font-size:12px;color:var(--text);line-height:1.6">'+an.note+'</div></div>';
     }).join('')
     +'</div>';
@@ -517,30 +517,103 @@ function rpBox(t,v,s,c){
 /* ═══════════ MATCH MODAL ═══════════ */
 function openMatch(id){
   const m=AM.find(x=>x.id===id);if(!m)return;
-  document.getElementById('mtit').textContent=m.opp+' · '+m.score+' · '+m.date;
-  const rc=m.res==='W'?'#16a34a':m.res==='L'?'#dc2626':'#d97706';
+  document.getElementById('mtit').textContent='vs '+m.opp+' · '+m.score+' · '+m.date;
+
+  const rc=m.res==='W'?'#00c463':m.res==='L'?'#f5365c':'#d97706';
   const rl=m.res==='W'?'✅ VITTORIA':m.res==='L'?'❌ SCONFITTA':'➖ PAREGGIO';
   const motm=m.ps.find(p=>p.motm);
-  const avgR=(m.ps.reduce((s,p)=>s+p.rating,0)/(m.ps.length||1)).toFixed(1);
+  const n=m.ps.length||1;
+  const avgR=m.ps.reduce((s,p)=>s+p.rating,0)/n;
   const totPass=m.ps.reduce((s,p)=>s+p.passesmade,0);
   const totDrib=m.ps.reduce((s,p)=>s+p.dribbles,0);
   const totInt=m.ps.reduce((s,p)=>s+p.interceptions,0);
+  const totTackles=m.ps.reduce((s,p)=>s+p.tacklesmade,0);
+
+  // ── Analisi tattica ──
+  const analysis=analyzeMatch(m,avgR);
+
+  // ── Promossi / Bocciati ──
+  const sorted=[...m.ps].sort((a,b)=>b.rating-a.rating);
+  const promossi=sorted.filter(p=>p.rating>=7.5);
+  const bocciati=sorted.filter(p=>p.rating<6.5);
+  const sufficienti=sorted.filter(p=>p.rating>=6.5&&p.rating<7.5);
+
   document.getElementById('mbody').innerHTML=
-    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap">'
-    +'<div style="background:'+rc+';border-radius:10px;padding:8px 20px;font-family:\'Barlow Condensed\';font-size:36px;font-weight:900;color:#fff">'+m.score+'</div>'
-    +'<div><div style="font-size:15px;font-weight:700;color:'+rc+'">'+rl+(m.dnf?' (DNF)':'')+'</div><div style="font-size:11px;color:var(--mid)">'+m.date+' · '+m.tlabel+'</div></div>'
+
+    // ── HEADER RISULTATO ──
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap">'
+    +'<div style="background:'+rc+';border-radius:8px;padding:8px 22px;font-family:\'Barlow Condensed\';font-size:42px;font-weight:900;color:#fff;letter-spacing:2px;box-shadow:0 4px 20px '+rc+'44">'+m.score+'</div>'
+    +'<div><div style="font-size:16px;font-weight:700;color:'+rc+'">'+rl+(m.dnf?' <span style="font-size:11px;background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;margin-left:6px">DNF</span>':'')+'</div>'
+    +'<div style="font-size:11px;color:var(--mid);margin-top:3px">'+m.date+' · '+m.tlabel+'</div></div>'
     +'<div style="flex:1"></div>'
-    +(motm?'<div style="background:var(--gold3);border:1px solid rgba(232,185,35,.3);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.8px">Man of Match</div><div style="font-family:\'Barlow Condensed\';font-size:22px;font-weight:900;color:var(--gold)">'+motm.name+'</div><div style="font-size:12px;color:var(--text)">'+motm.rating.toFixed(1)+' · '+motm.goals+'G '+motm.assists+'A</div></div>':'')
+    +(motm?'<div style="background:rgba(0,245,122,.08);border:1px solid rgba(0,245,122,.3);border-radius:10px;padding:10px 16px;text-align:center">'
+    +'<div style="font-size:9px;color:#00f57a;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⭐ Man of Match</div>'
+    +'<div style="font-family:\'Barlow Condensed\';font-size:22px;font-weight:900;color:#00f57a">'+motm.name+'</div>'
+    +'<div style="font-size:11px;color:var(--text)">'+motm.rating.toFixed(1)+' · '+motm.goals+'G '+motm.assists+'A</div>'
+    +'</div>':'')
     +'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px">'
-    +ms2(m.shots,'Tiri')+ms2(m.shotConv+'%','Shot conv.')+ms2(avgR,'Rating med.')
-    +ms2(totPass,'Pass riusciti')+ms2(totDrib,'Dribbling')+ms2(totInt,'Intercetti')
+
+    // ── KPI SQUADRA ──
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">'
+    +ms2(avgR.toFixed(2),'Rating medio','',avgR>=7.5?'#00f57a':avgR>=6.5?'#f59e0b':'#f5365c')
+    +ms2(m.shots,'Tiri totali','',m.shots>=8?'#00f57a':m.shots>=4?'#f59e0b':'#f5365c')
+    +ms2(m.shotConv+'%','Shot conversion','',m.shotConv>=40?'#00f57a':m.shotConv>=20?'#f59e0b':'#f5365c')
+    +ms2(m.gf+'–'+m.ga,'Gol','',rc)
     +'</div>'
-    +'<div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;font-weight:700">Statistiche individuali</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px">'
+    +ms2(totPass,'Passaggi riusciti','','#60a5fa')
+    +ms2(totDrib,'Dribbling','','#a78bfa')
+    +ms2(totInt,'Intercetti','','#34d399')
+    +ms2(totTackles,'Contrasti vinti','','#f59e0b')
+    +'</div>'
+
+    // ── ANALISI TATTICA ──
+    +'<div style="font-size:10px;color:#00f57a;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">📋 Lettura della partita</div>'
+    +'<div style="background:var(--card);border:1px solid rgba(0,245,122,.15);border-left:3px solid #00f57a;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--text);line-height:1.9">'
+    +analysis.lettura
+    +'</div>'
+
+    // ── ASPETTI POSITIVI / NEGATIVI ──
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
+    +'<div style="background:rgba(0,245,122,.06);border:1px solid rgba(0,245,122,.2);border-radius:10px;padding:14px">'
+    +'<div style="font-size:10px;color:#00f57a;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">✅ Aspetti positivi</div>'
+    +'<ul style="list-style:none;display:flex;flex-direction:column;gap:6px">'
+    +analysis.positivi.map(s=>'<li style="font-size:12px;color:var(--text);display:flex;gap:7px;line-height:1.5"><span style="color:#00f57a;flex-shrink:0">▸</span>'+s+'</li>').join('')
+    +'</ul></div>'
+    +'<div style="background:rgba(245,54,92,.06);border:1px solid rgba(245,54,92,.2);border-radius:10px;padding:14px">'
+    +'<div style="font-size:10px;color:#f5365c;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">⚠️ Aspetti critici</div>'
+    +'<ul style="list-style:none;display:flex;flex-direction:column;gap:6px">'
+    +analysis.critici.map(s=>'<li style="font-size:12px;color:var(--text);display:flex;gap:7px;line-height:1.5"><span style="color:#f5365c;flex-shrink:0">▸</span>'+s+'</li>').join('')
+    +'</ul></div>'
+    +'</div>'
+
+    // ── PROMOSSI / BOCCIATI ──
+    +'<div style="font-size:10px;color:#00f57a;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">🎖️ Pagelle</div>'
+    +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">'
+    +sorted.map(p=>{
+      const isTop=p.rating>=7.5,isFlop=p.rating<6.5;
+      const bg=isTop?'rgba(0,245,122,.06)':isFlop?'rgba(245,54,92,.06)':'rgba(255,255,255,.03)';
+      const border=isTop?'rgba(0,245,122,.25)':isFlop?'rgba(245,54,92,.25)':'var(--border)';
+      const badge=isTop?'<span style="font-size:9px;background:rgba(0,245,122,.15);color:#00f57a;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">PROMOSSO</span>':isFlop?'<span style="font-size:9px;background:rgba(245,54,92,.15);color:#f5365c;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">BOCCIATO</span>':'';
+      const rc2=p.rating>=8.5?'#00f57a':p.rating>=7?'#00f57a':p.rating>=6.5?'#f59e0b':'#f5365c';
+      const note=buildPlayerMatchNote(p,m);
+      return '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:12px 14px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+        +'<div style="font-family:\'Barlow Condensed\';font-size:28px;font-weight:900;color:'+rc2+';width:44px;flex-shrink:0">'+p.rating.toFixed(1)+'</div>'
+        +'<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--white)">'+p.name+(p.motm?' ⭐':'')+badge+'</div>'
+        +'<div style="font-size:10px;color:var(--mid)">'+( PLFULL[p.pos]||p.pos||'—')+' · '+p.goals+'G '+p.assists+'A · '+p.shots+' tiri · '+p.dribbles+' drib · '+p.interceptions+' int'+(p.passPct!==null?' · pass '+p.passPct+'%':'')+'</div>'
+        +'</div></div>'
+        +'<div style="font-size:12px;color:var(--text);line-height:1.6;padding-left:54px">'+note+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+
+    // ── TABELLA STATISTICA ──
+    +'<div style="font-size:10px;color:#00f57a;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">📊 Statistiche complete</div>'
     +'<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
-    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">G</th><th class="r">A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">Drib</th><th class="r">Int</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th>'
+    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">G</th><th class="r">A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">Drib</th><th class="r">Int</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">RC</th>'
     +'</tr></thead><tbody>'
-    +m.ps.map(p=>{
+    +sorted.map(p=>{
       const rc2=p.rating>=8.5?'hi':p.rating>=7?'me':'lo';
       return '<tr '+(p.motm?'class="motm"':'')+'><td><strong style="color:var(--white)">'+p.name+'</strong>'+(p.motm?' ⭐':'')+'</td>'
       +'<td style="color:var(--mid);font-size:10px">'+(PLBL[p.pos]||'—')+'</td>'
@@ -551,12 +624,125 @@ function openMatch(id){
       +'<td class="r">'+(p.passPct!==null?p.passPct+'%':'—')+'</td>'
       +'<td class="r">'+(p.tacklePct!==null?p.tacklePct+'%':'—')+'</td>'
       +'<td class="r">'+(p.saves||'—')+'</td>'
+      +'<td class="r">'+(p.redcards?'<span style="color:#f5365c;font-weight:700">🟥</span>':'—')+'</td>'
       +'</tr>';
     }).join('')+'</tbody></table></div>';
+
   document.getElementById('movl').classList.add('open');
 }
-function ms2(v,l){return '<div class="ministat"><div class="msv">'+v+'</div><div class="msl">'+l+'</div></div>';}
+
+/* ── ms2 helper con colore opzionale ── */
+function ms2(v,l,sub,col){
+  return '<div class="ministat" style="'+(col?'border-color:'+col+'22':'')+'"><div class="msv" style="'+(col?'color:'+col:'')+'">'+v+'</div><div class="msl">'+l+'</div>'+(sub?'<div style="font-size:9px;color:var(--mid)">'+sub+'</div>':'')+'</div>';
+}
 window.openMatch=openMatch;
+
+/* ═══════════ ANALISI MATCH ═══════════ */
+function analyzeMatch(m,avgR){
+  const pos=[],neg=[];
+  const n=m.ps.length||1;
+
+  // Shot conversion
+  if(m.shotConv>=50) pos.push('Shot conversion eccellente ('+m.shotConv+'%) — la squadra ha sfruttato bene le occasioni create');
+  else if(m.shotConv>=25) pos.push('Discreta efficacia sotto porta: '+m.shotConv+'% di conversione su '+m.shots+' tiri');
+  else if(m.shots>=6) neg.push('Spreco di occasioni: '+m.shots+' tiri ma solo '+m.shotConv+'% di conversione — mancanza di cinismo offensivo');
+  else neg.push('Produzione offensiva scarsa: solo '+m.shots+' tiri in tutta la partita');
+
+  // Rating medio
+  if(avgR>=8) pos.push('Prestazione collettiva di alto livello: rating medio squadra '+avgR.toFixed(2));
+  else if(avgR>=7) pos.push('Buon livello collettivo: rating medio squadra '+avgR.toFixed(2));
+  else if(avgR<6.5) neg.push('Prestazione scadente sotto ogni punto di vista: rating medio di soli '+avgR.toFixed(2));
+  else neg.push('Prestazione nel complesso insufficiente: rating medio squadra '+avgR.toFixed(2));
+
+  // Dribbling
+  const totDrib=m.ps.reduce((s,p)=>s+p.dribbles,0);
+  if(totDrib>=15) pos.push('Grande dinamismo palla al piede: '+totDrib+' dribbling riusciti — la squadra ha messo in difficoltà gli avversari');
+  else if(totDrib<6) neg.push('Scarsa pericolosità in conduzione: appena '+totDrib+' dribbling completati in tutta la partita');
+
+  // Intercetti
+  const totInt=m.ps.reduce((s,p)=>s+p.interceptions,0);
+  if(totInt>=10) pos.push('Fase difensiva proattiva: '+totInt+' intercetti totali — ottima lettura delle traiettorie avversarie');
+  else if(totInt<4&&m.ga>=2) neg.push('Fase difensiva passiva: solo '+totInt+' intercetti con '+m.ga+' gol subiti — difficoltà nel leggere il gioco avversario');
+
+  // Passaggi
+  const totPass=m.ps.reduce((s,p)=>s+p.passesmade,0);
+  const totPassAtt=m.ps.reduce((s,p)=>s+p.passattempts,0);
+  const teamPassPct=totPassAtt>0?Math.round(totPass/totPassAtt*100):null;
+  if(teamPassPct!==null){
+    if(teamPassPct>=82) pos.push('Buon palleggio collettivo: '+teamPassPct+'% di precisione nei passaggi ('+totPass+'/'+totPassAtt+') — squadra ordinata in fase di costruzione');
+    else if(teamPassPct<65) neg.push('Molti errori in fase di impostazione: solo '+teamPassPct+'% di passaggi riusciti — continui errori che hanno spezzato il ritmo di gioco');
+  }
+
+  // Gol subiti
+  if(m.ga===0) pos.push('Clean sheet mantenuto ✓ — solidità difensiva eccellente per tutta la partita');
+  else if(m.ga>=3) neg.push('Difesa perforata '+m.ga+' volte — grave difficoltà nel contenere la pressione avversaria');
+
+  // Red cards
+  const reds=m.ps.reduce((s,p)=>s+p.redcards,0);
+  if(reds>0) neg.push(reds+' espulsione/i che ha condizionato negativamente la gestione della partita');
+
+  // DNF
+  if(m.dnf) neg.push('Partita terminata per abbandono avversario (DNF) — il risultato riflette una situazione anomala');
+
+  // Costruzione lettura narrativa
+  const context=m.res==='W'?
+    (avgR>=8?'Prestazione dominante e convincente. ':'m.gf>m.ga+1?\'Vittoria netta che riflette la superiorità mostrata in campo. \':`Vittoria sofferta, conquistata con carattere nonostante alcune difficoltà. `'):
+    m.res==='L'?
+    (avgR<6.5?'Sconfitta meritata in una giornata da dimenticare. ':'Sconfitta che fa male ma non rispecchia completamente quanto visto in campo. '):
+    'Pareggio che lascia un po\' di amaro in bocca. ';
+
+  const attacco=m.gf>=3?'Il reparto offensivo ha funzionato bene, riuscendo a trovare la via del gol con continuità. ':
+    m.gf===0?'Il principale problema è stata la sterilità offensiva: zero gol nonostante gli spazi creati. ':
+    m.gf>=2?'Discreta produzione offensiva, con la squadra che ha saputo capitalizzare le occasioni create. ':'';
+
+  const difesa=m.ga===0?'Solidità difensiva assoluta: nessun gol subito. ':
+    m.ga>=3?'La difesa ha sofferto enormemente, concedendo troppo agli avversari. ':
+    m.ga>=2?'Qualche amnesia difensiva di troppo che ha permesso agli avversari di segnare. ':
+    m.ga===1?'Un gol subito che era evitabile con maggiore attenzione in copertura. ':'';
+
+  const lettura=context+attacco+difesa+
+    'Rating medio di squadra: <strong style="color:'+(avgR>=7.5?'#00f57a':avgR>=6.5?'#f59e0b':'#f5365c')+'">'+avgR.toFixed(2)+'</strong>. '+
+    (m.shots>0?'Efficacia sotto porta del <strong style="color:var(--white)">'+m.shotConv+'%</strong> su <strong style="color:var(--white)">'+m.shots+'</strong> tiri. ':'')+
+    (teamPassPct!==null?'Precisione nei passaggi al <strong style="color:var(--white)">'+teamPassPct+'%</strong>.':'');
+
+  if(pos.length===0) pos.push('Prestazione nel complesso da rivedere');
+  if(neg.length===0) neg.push('Nessuna criticità evidente in questa partita');
+
+  return{lettura,positivi:pos,critici:neg};
+}
+
+/* ── Nota individuale per partita ── */
+function buildPlayerMatchNote(p,m){
+  const parts=[];
+  const ps=MS[p.name];// stagione stats per confronto
+  const avgSeason=ps?ps.avgR:7;
+
+  if(p.motm) parts.push('<strong style="color:#00f57a">Eletto Man of the Match</strong> — prestazione di assoluto livello.');
+  if(p.rating>=9) parts.push('Partita sontuosa: voto '+p.rating.toFixed(1)+', probabilmente la sua miglior performance stagionale.');
+  else if(p.rating>=8) parts.push('Ottima partita, tra i migliori in campo con un voto di '+p.rating.toFixed(1)+'.');
+  else if(p.rating>=7) parts.push('Prova sufficiente con qualche lampo di qualità ('+p.rating.toFixed(1)+').');
+  else if(p.rating>=6.5) parts.push('Prestazione sotto le aspettative: '+p.rating.toFixed(1)+', con troppi errori e poca incisività.');
+  else parts.push('<strong style="color:#f5365c">Gara da dimenticare</strong>: voto '+p.rating.toFixed(1)+', lontanissimo dal suo standard.');
+
+  if(ps && Math.abs(p.rating-avgSeason)>=0.8){
+    if(p.rating>avgSeason) parts.push('Sopra la sua media stagionale ('+avgSeason.toFixed(2)+') di '+( p.rating-avgSeason).toFixed(1)+' punti — in grande forma.');
+    else parts.push('Sotto la sua media stagionale ('+avgSeason.toFixed(2)+') di '+( avgSeason-p.rating).toFixed(1)+' punti.');
+  }
+
+  if(p.goals>=2) parts.push('Mattatore offensivo: '+p.goals+' gol segnati.');
+  else if(p.goals===1) parts.push('Ha trovato la via del gol.');
+  if(p.assists>=2) parts.push('Grande visione di gioco: '+p.assists+' assist distribuiti.');
+  else if(p.assists===1) parts.push('Ha fornito un assist decisivo.');
+  if(p.shots>=5) parts.push('Molto pericoloso: '+p.shots+' conclusioni verso la porta.');
+  if(p.dribbles>=8) parts.push('Incontenibile palla al piede: '+p.dribbles+' dribbling riusciti.');
+  if(p.interceptions>=5) parts.push('Muro difensivo: '+p.interceptions+' intercetti.');
+  if(p.passPct!==null&&p.passPct>=90) parts.push('Pulizia tecnica di alto livello: '+p.passPct+'% di precisione nei passaggi.');
+  else if(p.passPct!==null&&p.passPct<55) parts.push('Molti errori in palleggio: solo '+p.passPct+'% di passaggi riusciti.');
+  if(p.saves>=3) parts.push('Decisivo tra i pali: '+p.saves+' parate.');
+  if(p.redcards>0) parts.push('<strong style="color:#f5365c">Espulso</strong> — ha lasciato la squadra in 10.');
+
+  return parts.join(' ')||'Partita nella norma, senza particolari guizzi.';
+}
 
 /* ═══════════ PLAYER MODAL ═══════════ */
 function openPlayer(name){
@@ -573,11 +759,11 @@ function openPlayer(name){
     // TIER + TREND
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
     +'<span class="pc-tier tier-'+p.tier+'" style="font-size:11px;padding:4px 12px">'+tierLabel(p.tier)+'</span>'
-    +'<span style="font-size:12px;color:'+(p.trend>0.3?'#4ade80':p.trend<-0.3?'#f87171':'var(--mid)')+';">'+(p.trend>0.3?'📈 In crescita':p.trend<-0.3?'📉 In calo':'➡️ Stabile')+' (ultimi 5 match: '+p.recentAvg.toFixed(2)+')</span>'
+    +'<span style="font-size:12px;color:'+(p.trend>0.3?'#00f57a':p.trend<-0.3?'#f5365c':'var(--mid)')+';">'+(p.trend>0.3?'📈 In crescita':p.trend<-0.3?'📉 In calo':'➡️ Stabile')+' (ultimi 5 match: '+p.recentAvg.toFixed(2)+')</span>'
     +'<span style="font-size:12px;color:var(--mid);margin-left:auto">Win rate: <strong style="color:var(--white)">'+p.winPct+'%</strong> · '+p.wins+'/'+p.apps+' vittorie</span>'
     +'</div>'
     // VERDICT
-    +'<div class="verdict '+p.tier+'"><span style="font-weight:700;color:var(--gold)">📋 Giudizio: </span>'+an.note+'</div>'
+    +'<div class="verdict '+p.tier+'"><span style="font-weight:700;color:#00f57a">📋 Giudizio: </span>'+an.note+'</div>'
     // STRENGTHS / WEAKNESSES
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
     +'<div class="abox str"><h4>✅ Punti di forza</h4><ul>'+an.str.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>'
@@ -587,11 +773,11 @@ function openPlayer(name){
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">'
     // COL 1: Offensive
     +'<div style="background:var(--navy);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;font-weight:700">⚽ Offensive</div>'
-    +sr('Gol totali',p.goals,'','#4ade80')
+    +sr('Gol totali',p.goals,'','#00f57a')
     +sr('Assist totali',p.assists,'','#60a5fa')
-    +sr('G+A',p.ga,'','#e8b923')
-    +sr('Gol/90min',p.goals90.toFixed(2),'','#4ade80')
-    +sr('G+A/90min',p.ga90.toFixed(2),'','#e8b923')
+    +sr('G+A',p.ga,'','#00f57a')
+    +sr('Gol/90min',p.goals90.toFixed(2),'','#00f57a')
+    +sr('G+A/90min',p.ga90.toFixed(2),'','#00f57a')
     +sr('Pre-assist',p.secondAssists,'','#a78bfa')
     +'</div>'
     // COL 2: Tecnica
@@ -606,11 +792,11 @@ function openPlayer(name){
     // COL 3: Difensiva & disciplina
     +'<div style="background:var(--navy);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;font-weight:700">🛡️ Difesa & disciplina</div>'
     +sr('Intercetti tot.',p.interceptions,p.avgInt.toFixed(1)+'/gara','#34d399')
-    +sr('Clean sheet',p.cleansheets,'','#4ade80')
-    +sr('Cartellini rossi',p.redcards,'',p.redcards>0?'#f87171':'#4ade80')
+    +sr('Clean sheet',p.cleansheets,'','#00f57a')
+    +sr('Cartellini rossi',p.redcards,'',p.redcards>0?'#f5365c':'#00f57a')
     +sr('Minuti giocati',p.minsPlayed,Math.round(p.minsPlayed/p.apps)+'m/gara','#a8c0e0')
-    +sr('Consistenza',p.cons.toFixed(2)+' σ',p.cons<1?'ottima':p.cons<1.5?'buona':'discontinua',p.cons<1?'#4ade80':p.cons<1.5?'#e8b923':'#f87171')
-    +sr('Rating recente',p.recentAvg.toFixed(2),'ultimi 5 match',p.recentAvg>p.avgR?'#4ade80':'#f87171')
+    +sr('Consistenza',p.cons.toFixed(2)+' σ',p.cons<1?'ottima':p.cons<1.5?'buona':'discontinua',p.cons<1?'#00f57a':p.cons<1.5?'#00f57a':'#f5365c')
+    +sr('Rating recente',p.recentAvg.toFixed(2),'ultimi 5 match',p.recentAvg>p.avgR?'#00f57a':'#f5365c')
     +'</div></div>'
     // RADAR
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
@@ -631,7 +817,7 @@ function openPlayer(name){
   const radarData=buildRadar(p);
   new Chart(document.getElementById('pradar'),{
     type:'radar',
-    data:{labels:radarData.labels,datasets:[{data:radarData.values,backgroundColor:'rgba(232,185,35,.15)',borderColor:'#e8b923',pointBackgroundColor:'#e8b923',pointRadius:3}]},
+    data:{labels:radarData.labels,datasets:[{data:radarData.values,backgroundColor:'rgba(0,245,122,.12)',borderColor:'#00f57a',pointBackgroundColor:'#00f57a',pointRadius:3}]},
     options:{responsive:true,maintainAspectRatio:true,scales:{r:{ticks:{display:false,stepSize:20},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'#a8c0e0',font:{size:9}},min:0,max:100}},plugins:{legend:{display:false}}}
   });
 
@@ -640,7 +826,7 @@ function openPlayer(name){
   new Chart(document.getElementById('ptrendch'),{
     type:'line',
     data:{labels:hist2.map(h=>h.opp.slice(0,8)),datasets:[
-      {data:hist2.map(h=>h.rating),borderColor:'#e8b923',backgroundColor:'rgba(232,185,35,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:hist2.map(h=>h.rating>=8?'#4ade80':h.rating>=7?'#e8b923':'#f87171')},
+      {data:hist2.map(h=>h.rating),borderColor:'#00f57a',backgroundColor:'rgba(0,245,122,.06)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:hist2.map(h=>h.rating>=8?'#00f57a':h.rating>=7?'#00f57a':'#f5365c')},
       {data:Array(hist2.length).fill(+p.avgR.toFixed(2)),borderColor:'rgba(255,255,255,.2)',borderDash:[4,4],pointRadius:0,fill:false}
     ]},
     options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a7090',font:{size:8}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#5a7090',font:{size:8}},grid:{color:'rgba(255,255,255,.04)'},min:0,max:10}}}
@@ -649,7 +835,7 @@ function openPlayer(name){
   document.getElementById('povl').classList.add('open');
 }
 function sr(l,v,sub,c){return '<div class="srow"><span class="srl">'+l+'</span><div style="text-align:right"><span class="srv" style="color:'+(c||'var(--white)')+'">'+v+'</span>'+(sub?'<div class="srs">'+sub+'</div>':'')+'</div></div>';}
-function rcol(r){return r>=8.5?'color:#4ade80':r>=7?'color:#e8b923':'color:#f87171';}
+function rcol(r){return r>=8.5?'color:#00f57a':r>=7?'color:#00f57a':'color:#f5365c';}
 
 function buildRadar(p){
   const pos=p.pos;
