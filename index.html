@@ -403,26 +403,26 @@ let clubOverall   = {};
 let charts        = {};
 
 // ── INIT ──────────────────────────────────────────────────────────────────
+const API_URL = 'https://api.ourproclub.app/api/match/history?clubId=2025457';
 window.addEventListener('load', () => loadAll());
 
 async function loadAll() {
   showLoader(true);
   try {
-    // Carica i dati da data.json (stesso repo GitHub/Vercel)
-    const res = await fetch('./data.json');
-    if (!res.ok) throw new Error('data.json non trovato');
-    const data = await res.json();
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const raw = await res.json();
 
-    allMatches  = normalizeMatches(data.matches || []);
+    allMatches  = parseAPIMatches(raw);
     memberStats = buildMemberStats(allMatches);
-    clubOverall = data.club || {};
+    clubOverall = buildClubOverall(allMatches);
 
     showLoader(false);
     show('dashboard');
     renderAll();
     document.getElementById('lastUpdated').textContent =
-      `Ultimo aggiornamento: ${data.club?.lastUpdated || 'n/d'} · ${allMatches.length} partite caricate`;
-    document.getElementById('liveLabel').textContent = 'Dati locali';
+      `Dati live · ${allMatches.length} partite · aggiornato ${new Date().toLocaleString('it-IT')}`;
+    document.getElementById('liveLabel').textContent = 'Live ✓';
   } catch(e) {
     showLoader(false);
     showError(e.message);
@@ -430,37 +430,75 @@ async function loadAll() {
 }
 
 // ── PARSERS ───────────────────────────────────────────────────────────────
-// ── PARSERS (formato data.json) ───────────────────────────────────────────
-// I match in data.json hanno già il formato corretto, li normalizziamo solo
-function normalizeMatches(matches) {
-  return matches.map(m => ({
-    id:           m.id,
-    timestamp:    0,
-    matchDate:    m.date ? new Date(m.date).toLocaleDateString('it-IT', {
-                    weekday:'short', day:'numeric', month:'short', year:'numeric'
-                  }) : 'Data n/d',
-    opponent:     m.opponent,
-    score:        m.score,
-    goalsFor:     m.goalsFor,
-    goalsAgainst: m.goalsAgainst,
-    result:       m.result,
-    teamStats: {
-      shotsFor:       m.stats?.shots || 0,
-      shotSuccessFor: m.stats?.shotSuccess || 0,
-      passSuccessFor: m.stats?.passSuccess || 0,
-      possessionFor:  m.stats?.possession || 0,
-    },
-    players: (m.players || []).map(p => ({
-      name:          p.name,
-      rating:        p.rating,
-      goals:         p.goals,
-      assists:       p.assists,
-      ga:            p.goals + p.assists,
-      passSuccess:   p.passSuccess || '-',
-      tackleSuccess: p.tackleSuccess || '-',
-      motm:          p.motm || false,
-    })).sort((a,b) => b.rating - a.rating),
-  }));
+// ── PARSERS (formato ourproclub API) ──────────────────────────────────────
+const MY_CLUB = '2025457';
+
+function parseAPIMatches(raw) {
+  return raw.map(m => {
+    const clubs     = m.match_data?.clubs || {};
+    const myClub    = clubs[MY_CLUB] || {};
+    const oppId     = Object.keys(clubs).find(id => id !== MY_CLUB);
+    const oppClub   = oppId ? clubs[oppId] : {};
+
+    const gf = parseInt(myClub.goals || 0);
+    const ga = parseInt(oppClub.goals || 0);
+    const result = myClub.winnerByDnf === '1' ? 'W'
+                 : oppClub.winnerByDnf === '1' ? 'L'
+                 : gf > ga ? 'W' : gf < ga ? 'L' : 'D';
+
+    const players = Object.entries(m.player_data || {})
+      .filter(([name]) => ROSTER.size === 0 || ROSTER.has(name))
+      .map(([name, p]) => {
+        const pm = parseInt(p.passesmade || 0);
+        const pa = parseInt(p.passattempts || 0);
+        const tm = parseInt(p.tacklesmade || 0);
+        const ta = parseInt(p.tackleattempts || 0);
+        return {
+          name,
+          rating:        parseFloat(p.rating || 0),
+          goals:         parseInt(p.goals || 0),
+          assists:       parseInt(p.assists || 0),
+          ga:            parseInt(p.goals || 0) + parseInt(p.assists || 0),
+          shots:         parseInt(p.shots || 0),
+          passSuccess:   pa > 0 ? Math.round(pm/pa*100)+'%' : '-',
+          tackleSuccess: ta > 0 ? Math.round(tm/ta*100)+'%' : '-',
+          motm:          p.mom === '1',
+          pos:           p.pos || '',
+        };
+      })
+      .sort((a,b) => b.rating - a.rating);
+
+    const ts = parseInt(m.match_date || 0);
+    return {
+      id:           String(m.id),
+      timestamp:    ts,
+      matchDate:    ts ? new Date(ts * 1000).toLocaleDateString('it-IT', {
+                      weekday:'short', day:'numeric', month:'short', year:'numeric'
+                    }) : 'Data n/d',
+      matchType:    m.match_type === 'playoffMatch' ? '🏆 Playoff' : '🏅 Campionato',
+      opponent:     oppClub.clubName || `Club ${oppId}`,
+      score:        `${gf}-${ga}`,
+      goalsFor:     gf,
+      goalsAgainst: ga,
+      result,
+      teamStats: {
+        shotsFor:       players.reduce((s,p) => s + p.shots, 0),
+        shotSuccessFor: gf > 0 && players.reduce((s,p)=>s+p.shots,0) > 0
+                          ? Math.round(gf / players.reduce((s,p)=>s+p.shots,0) * 100) : 0,
+        passSuccessFor: 0,
+        possessionFor:  0,
+      },
+      players,
+    };
+  }).sort((a,b) => b.timestamp - a.timestamp);
+}
+
+function buildClubOverall(matches) {
+  const W = matches.filter(m=>m.result==='W').length;
+  const L = matches.filter(m=>m.result==='L').length;
+  const D = matches.filter(m=>m.result==='D').length;
+  return { wins:W, losses:L, draws:D, skillRating: '—',
+           gamesPlayed: matches.length };
 }
 
 // Costruisce le statistiche aggregate per giocatore dai match
@@ -492,7 +530,7 @@ function renderAll() {
 
 // ── KPIs ──────────────────────────────────────────────────────────────────
 function renderKPIs() {
-  const W = clubOverall.wins || allMatches.filter(m=>m.result==='W').length;
+  const W = allMatches.filter(m=>m.result==='W').length;
   const L = allMatches.filter(m=>m.result==='L').length;
   const D = allMatches.filter(m=>m.result==='D').length;
   const gf = allMatches.reduce((s,m)=>s+m.goalsFor,0);
@@ -609,7 +647,7 @@ function matchRowHTML(m) {
     <div class="result-box ${rc}">${rc}</div>
     <div class="match-info">
       <div class="match-opp">vs ${m.opponent}</div>
-      <div class="match-meta">${m.matchDate} · ${m.players.length} giocatori</div>
+      <div class="match-meta">${m.matchDate} · ${m.matchType} · ${m.players.length} giocatori</div>
     </div>
     <div class="match-pills">
       <span class="pill">⚽ ${m.teamStats.shotsFor||'?'} tiri</span>
