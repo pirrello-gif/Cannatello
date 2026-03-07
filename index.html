@@ -391,11 +391,11 @@ const ROSTER   = new Set([
   'drummer7i','Rob_ut09','rururu92','ekasemu','CapraGirgentana','RedEagle1912'
 ]);
 
-// EA API base — chiamata via proxy CORS pubblico per evitare blocchi browser
-// Il sito EA ha Access-Control-Allow-Origin: https://www.ea.com
-// Usiamo un proxy CORS-anywhere oppure chiamata diretta (funziona da web app hostata su ea.com)
-// Per ora proviamo diretta, se fallisce usiamo proxy
-const EA_BASE = 'https://proclubs.ea.com/api/fc';
+
+
+
+
+const EA_BASE = '/api/proxy';
 
 let allMatches    = [];
 let memberStats   = {};
@@ -430,23 +430,11 @@ async function loadAll() {
   }
 }
 
-// ── FETCH EA API ──────────────────────────────────────────────────────────
+// ── FETCH EA API via Vercel Proxy ─────────────────────────────────────────
 async function fetchEA(path) {
-  // Prova diretta prima
-  const directUrl = EA_BASE + path;
-  const proxyUrl  = `https://corsproxy.io/?${encodeURIComponent(directUrl)}`;
-
-  let res;
-  try {
-    res = await fetch(directUrl, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('direct failed');
-  } catch {
-    // Fallback al proxy CORS
-    res = await fetch(proxyUrl);
-  }
-
+  // Chiama /api/proxy?path=... che a sua volta chiama proclubs.ea.com dal server
+  const url = `${EA_BASE}?path=${encodeURIComponent(path)}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`API error ${res.status} su ${path}`);
   return res.json();
 }
