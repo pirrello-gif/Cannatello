@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Cannatello · Stats Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:  #0B1D3A;
+  --blue:  #132d5e;
+  --gold:  #E8B923;
+  --gold2: #f5cc3a;
+  --white: #FFFFFF;
+  --text:  #c8d8f0;
+  --mid:   #7a90b0;
+  --card:  #0f2548;
+  --card2: #112952;
+  --green: #1a7a42;
+  --red:   #b52222;
+  --border:#1e3a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HERO NAV ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,14,30,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.brand-logo {
+  width: 32px; height: 32px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.brand-name {
+  font-family: 'Bebas Neue'; font-size: 20px;
+  color: var(--gold); letter-spacing: 2px;
+}
+.brand-sub { font-size: 10px; color: var(--mid); margin-left: 2px; }
+
+.nav-pills { display: flex; gap: 2px; }
+.nav-pill {
+  padding: 6px 14px; border-radius: 20px; border: none;
+  background: transparent; color: var(--mid);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'Inter'; transition: all .2s; letter-spacing: .3px;
+}
+.nav-pill:hover { color: var(--text); }
+.nav-pill.active { background: var(--gold); color: var(--navy); }
+
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--mid);
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.5; transform:scale(1.3); }
+}
+
+/* ── VIEWS ── */
+.view { display: none; padding: 24px 20px; max-width: 1100px; margin: 0 auto; }
+.view.active { display: block; }
+
+/* ── LOADER ── */
+#loaderWrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 60vh; gap: 16px;
+}
+.loader-ring {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font-size: 13px; color: var(--mid); }
+
+/* ── ERROR BANNER ── */
+.error-banner {
+  background: rgba(181,34,34,.15); border: 1px solid rgba(181,34,34,.4);
+  border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+  font-size: 13px; color: #ef9090; display: none;
+  line-height: 1.6;
+}
+.error-banner.show { display: block; }
+
+/* ── SECTION HEADER ── */
+.sec-header {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 16px;
+}
+.sec-title {
+  font-family: 'Bebas Neue'; font-size: 22px;
+  color: var(--gold); letter-spacing: 1.5px;
+}
+.sec-sub { font-size: 11px; color: var(--mid); }
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 10px; margin-bottom: 24px;
+}
+.kpi {
+  background: var(--card); border-radius: 12px;
+  padding: 14px 16px; position: relative; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.kpi::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background: var(--gold); opacity: .6;
+}
+.kpi-v { font-family:'Bebas Neue'; font-size:34px; color:var(--gold); line-height:1; }
+.kpi-l { font-size:10px; color:var(--mid); text-transform:uppercase; letter-spacing:.6px; margin-top:3px; }
+.kpi-s { font-size:12px; color:var(--text); margin-top:1px; }
+
+/* ── CHART GRID ── */
+.chart-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 24px;
+}
+@media(max-width:680px){ .chart-grid { grid-template-columns: 1fr; } }
+.chart-card {
+  background: var(--card); border-radius: 12px;
+  padding: 16px; border: 1px solid var(--border);
+}
+.chart-card h3 {
+  font-size: 11px; color: var(--mid); text-transform: uppercase;
+  letter-spacing: .6px; margin-bottom: 12px;
+}
+.chart-card canvas { max-height: 200px; }
+
+/* ── MATCH CARDS ── */
+.matches-list { display: flex; flex-direction: column; gap: 8px; }
+.match-row {
+  background: var(--card); border-radius: 10px;
+  padding: 12px 16px; cursor: pointer;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+  transition: all .18s;
+}
+.match-row:hover {
+  border-color: var(--gold); background: var(--card2);
+  transform: translateX(3px);
+}
+.result-box {
+  width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue'; font-size: 20px; color: #fff;
+}
+.result-box.W { background: var(--green); }
+.result-box.L { background: var(--red); }
+.result-box.D { background: #c47a00; }
+
+.match-info { flex: 1; min-width: 0; }
+.match-opp { font-size: 14px; font-weight: 600; color: var(--white); }
+.match-meta { font-size: 11px; color: var(--mid); margin-top: 2px; }
+
+.match-score {
+  font-family: 'Bebas Neue'; font-size: 24px; color: var(--white);
+  flex-shrink: 0;
+}
+.match-pills { display: flex; gap: 6px; flex-shrink: 0; }
+.pill {
+  background: rgba(255,255,255,.06); border-radius: 20px;
+  padding: 3px 9px; font-size: 10px; color: var(--mid);
+  border: 1px solid var(--border);
+}
+
+/* ── SQUAD GRID ── */
+.squad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 10px;
+}
+.player-card {
+  background: var(--card); border-radius: 12px; padding: 14px;
+  border: 1px solid var(--border); transition: all .18s; cursor: pointer;
+}
+.player-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.player-card .p-name {
+  font-weight: 700; font-size: 14px; color: var(--gold);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.player-card .rank-badge {
+  font-size: 14px;
+}
+.p-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.p-stat {
+  background: rgba(255,255,255,.05); border-radius: 6px;
+  padding: 5px 8px; border: 1px solid var(--border);
+}
+.p-stat .v { font-size: 15px; font-weight: 700; color: var(--white); display: block; }
+.p-stat .l { font-size: 9px; color: var(--mid); text-transform: uppercase; }
+
+/* ── MODAL ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); z-index: 200;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--blue); border-radius: 16px;
+  width: 100%; max-width: 740px; max-height: 88vh;
+  overflow-y: auto; border: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.modal-head {
+  background: var(--navy); padding: 16px 20px;
+  border-bottom: 2px solid var(--gold);
+  border-radius: 16px 16px 0 0;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0;
+}
+.modal-head h2 { font-family:'Bebas Neue'; font-size:20px; color:var(--gold); }
+.modal-close {
+  background: none; border: none; color: var(--mid);
+  font-size: 20px; cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--white); }
+.modal-body { padding: 18px 20px; }
+
+/* ── STAT BAR ── */
+.stat-bars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.sbar { background: var(--navy); border-radius: 8px; padding: 10px 12px; }
+.sbar-label { font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.sbar-vals { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+.sbar-vals .for  { color: #4caf80; font-weight: 700; }
+.sbar-vals .aga  { color: #ef5050; font-weight: 700; }
+.sbar-track { background: var(--red); border-radius: 3px; height: 6px; overflow: hidden; }
+.sbar-fill  { background: var(--green); height: 100%; border-radius: 3px; transition: width .5s ease; }
+
+/* ── PLAYER TABLE ── */
+.ptable { width: 100%; border-collapse: collapse; }
+.ptable th {
+  background: var(--navy); color: var(--mid); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .5px;
+  padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.ptable th:not(:first-child) { text-align: center; }
+.ptable td {
+  padding: 9px 10px; font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  color: var(--text);
+}
+.ptable td:not(:first-child) { text-align: center; }
+.ptable tr:hover td { background: rgba(232,185,35,.04); }
+.ptable tr.motm td { background: rgba(232,185,35,.07); }
+.r-high { color: #50d080; font-weight: 700; }
+.r-med  { color: var(--gold); font-weight: 700; }
+.r-low  { color: #ef7070; font-weight: 700; }
+
+/* ── LAST UPDATED ── */
+.last-updated {
+  font-size: 11px; color: var(--mid); text-align: right;
+  margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:500px) {
+  .topbar { padding: 0 12px; }
+  .nav-pill { padding: 5px 10px; font-size: 11px; }
+  .stat-bars { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo">⚽</div>
+    <div>
+      <span class="brand-name">FC Cannatello</span>
+      <span class="brand-sub">FC26 · Southern Europe</span>
+    </div>
+  </div>
+
+  <div class="nav-pills">
+    <button class="nav-pill active" onclick="show('dashboard')">Dashboard</button>
+    <button class="nav-pill" onclick="show('matches')">Partite</button>
+    <button class="nav-pill" onclick="show('squad')">Giocatori</button>
+  </div>
+
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <span id="liveLabel">Live</span>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div id="loaderWrap">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Caricamento dati EA Sports...</div>
+</div>
+
+<!-- ERROR BANNER -->
+<div class="error-banner" id="errorBanner"></div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="view" id="view-dashboard">
+  <div class="error-banner" id="errorBannerDash"></div>
+  <div class="kpi-strip" id="kpiStrip"></div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>⚽ Gol per partita</h3>
+      <canvas id="cGoals"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>🎯 Shot Success % per partita</h3>
+      <canvas id="cShot"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>📊 Top G+A stagione</h3>
+      <canvas id="cGA"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>⭐ Rating medio stagione</h3>
+      <canvas id="cRating"></canvas>
+    </div>
+  </div>
+  <div class="sec-header">
+    <span class="sec-title">Ultime partite</span>
+    <span class="sec-sub">5 più recenti</span>
+  </div>
+  <div class="matches-list" id="recentList"></div>
+  <div class="last-updated" id="lastUpdated"></div>
+</div>
+
+<!-- ══ PARTITE ══ -->
+<div class="view" id="view-matches">
+  <div class="sec-header">
+    <span class="sec-title">Storico Partite</span>
+    <span class="sec-sub" id="matchCount"></span>
+  </div>
+  <div class="matches-list" id="allList"></div>
+</div>
+
+<!-- ══ GIOCATORI ══ -->
+<div class="view" id="view-squad">
+  <div class="sec-header">
+    <span class="sec-title">Statistiche Giocatori</span>
+    <span class="sec-sub">Stagione corrente · dati cumulativi</span>
+  </div>
+  <div class="squad-grid" id="squadGrid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Dettaglio</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const CLUB_ID  = '2025457';
+const PLATFORM = 'common-gen5';
+const ROSTER   = new Set([
+  'Pipaers','piertamb','FanelsLeclerc98','Matei5996','SAGAT92100',
+  'drummer7i','Rob_ut09','rururu92','ekasemu','CapraGirgentana','RedEagle1912'
+]);
+
+
+
+
+
+const EA_BASE = '/api/proxy';
+
+let allMatches    = [];
+let memberStats   = {};
+let clubOverall   = {};
+let charts        = {};
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => loadAll());
+
+async function loadAll() {
+  showLoader(true);
+  try {
+    const [matches, members, overall] = await Promise.all([
+      fetchEA(`/clubs/matches?platform=${PLATFORM}&clubId=${CLUB_ID}&matchType=gameType9&maxResultCount=20`),
+      fetchEA(`/members/career/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`),
+      fetchEA(`/clubs/overallStats?platform=${PLATFORM}&clubIds=${CLUB_ID}`),
+    ]);
+
+    allMatches  = parseMatches(matches);
+    memberStats = parseMembers(members);
+    clubOverall = parseOverall(overall);
+
+    showLoader(false);
+    show('dashboard');
+    renderAll();
+    document.getElementById('lastUpdated').textContent =
+      `Dati aggiornati: ${new Date().toLocaleString('it-IT')} · Fonte: EA Sports API`;
+    document.getElementById('liveLabel').textContent = 'Aggiornato';
+  } catch(e) {
+    showLoader(false);
+    showError(e.message);
+  }
+}
+
+// ── FETCH EA API via Vercel Proxy ─────────────────────────────────────────
+async function fetchEA(path) {
+  // Chiama /api/proxy?path=... che a sua volta chiama proclubs.ea.com dal server
+  const url = `${EA_BASE}?path=${encodeURIComponent(path)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error ${res.status} su ${path}`);
+  return res.json();
+}
+
+// ── PARSERS ───────────────────────────────────────────────────────────────
+function parseMatches(data) {
+  // La risposta EA ha forma: [ { matchId, timestamp, clubs:{}, players:{} }, ... ]
+  // oppure { matchLog: [...] }
+  const raw = Array.isArray(data) ? data : (data.matchLog || data.matches || []);
+  return raw.map(m => {
+    const myClub = m.clubs?.[CLUB_ID] || Object.values(m.clubs || {})[0] || {};
+    const oppEntry = Object.entries(m.clubs || {}).find(([id]) => id !== CLUB_ID);
+    const oppClub = oppEntry?.[1] || {};
+    const oppName = oppClub.details?.name || oppClub.name || `Club ${oppEntry?.[0] || '?'}`;
+
+    const gf = parseInt(myClub.goals ?? myClub.score ?? 0);
+    const ga = parseInt(myClub.goalsAgainst ?? oppClub.goals ?? oppClub.score ?? 0);
+    const result = myClub.result === '1' || myClub.wins === '1' ? 'W'
+                 : myClub.result === '2' || myClub.losses === '1' ? 'L' : 'D';
+
+    // Giocatori del nostro club
+    const myPlayers = m.players?.[CLUB_ID] || {};
+    const players = Object.values(myPlayers)
+      .map(p => ({
+        name:          p.playername || p.name || '?',
+        rating:        parseFloat(p.rating || 0),
+        goals:         parseInt(p.goals || 0),
+        assists:       parseInt(p.assists || 0),
+        ga:            parseInt(p.goals || 0) + parseInt(p.assists || 0),
+        passSuccess:   p.passattempts > 0
+                         ? Math.round(p.passesmade/p.passattempts*100) + '%'
+                         : (p.passPercentage ? p.passPercentage+'%' : '-'),
+        tackleSuccess: p.tackleattempts > 0
+                         ? Math.round(p.tacklesmade/p.tackleattempts*100) + '%'
+                         : (p.tacklePercentage ? p.tacklePercentage+'%' : '-'),
+        motm:          p.manofthematch === '1' || p.motm === '1',
+        pos:           p.position || '',
+      }))
+      .filter(p => ROSTER.size === 0 || ROSTER.has(p.name))
+      .sort((a,b) => b.rating - a.rating);
+
+    const ts = parseInt(m.timestamp || m.matchTimestamp || 0);
+    return {
+      id:        m.matchId || String(ts),
+      timestamp: ts,
+      matchDate: ts ? new Date(ts * 1000).toLocaleDateString('it-IT', {
+        weekday:'short', day:'numeric', month:'short', year:'numeric'
+      }) : 'Data n/d',
+      opponent:  oppName,
+      score:     `${gf}-${ga}`,
+      goalsFor:  gf,
+      goalsAgainst: ga,
+      result,
+      teamStats: {
+        shotSuccessFor:  myClub.shotPct  || (myClub.shots > 0 ? Math.round(myClub.goals/myClub.shots*100) : 0),
+        passSuccessFor:  myClub.passPct  || 0,
+        possessionFor:   myClub.possession || 0,
+        tackleSuccessFor:myClub.tacklePct || 0,
+        shotsFor:        myClub.shots || 0,
+      },
+      players,
+    };
+  }).sort((a,b) => b.timestamp - a.timestamp);
+}
+
+function parseMembers(data) {
+  // { members: [ { name, proName, goals, assists, rating, gamesPlayed, ... } ] }
+  const list = data.members || data || [];
+  const stats = {};
+  list.forEach(p => {
+    const name = p.proName || p.name || p.playername || '?';
+    if (ROSTER.size > 0 && !ROSTER.has(name)) return;
+    stats[name] = {
+      name,
+      apps:      parseInt(p.gamesPlayed || p.appearances || 0),
+      goals:     parseInt(p.goals || 0),
+      assists:   parseInt(p.assists || 0),
+      ga:        parseInt(p.goals || 0) + parseInt(p.assists || 0),
+      avgRating: parseFloat(p.rating || 0),
+      wins:      parseInt(p.wins || 0),
+      passSuccess: p.passPercentage ? `${p.passPercentage}%` : '-',
+      pos:       p.position || '',
+    };
+  });
+  return stats;
+}
+
+function parseOverall(data) {
+  const club = Array.isArray(data) ? data[0] : (data[CLUB_ID] || data);
+  return {
+    wins:    parseInt(club?.wins || 0),
+    losses:  parseInt(club?.losses || 0),
+    draws:   parseInt(club?.ties || club?.draws || 0),
+    goals:   parseInt(club?.goals || 0),
+    gamesPlayed: parseInt(club?.gamesPlayed || 0),
+    skillRating: parseInt(club?.skillRating || club?.rating || 0),
+  };
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll() {
+  renderKPIs();
+  renderCharts();
+  renderRecent();
+  renderAllMatches();
+  renderSquad();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const W = allMatches.filter(m=>m.result==='W').length;
+  const L = allMatches.filter(m=>m.result==='L').length;
+  const D = allMatches.filter(m=>m.result==='D').length;
+  const gf = allMatches.reduce((s,m)=>s+m.goalsFor,0);
+  const ga = allMatches.reduce((s,m)=>s+m.goalsAgainst,0);
+  const n  = allMatches.length || 1;
+
+  const kpis = [
+    { v: clubOverall.skillRating || '—', l:'Skill Rating',  s:'classifiche EA' },
+    { v: `${W}W·${D}D·${L}L`,           l:'Record',         s:`${Math.round(W/n*100)}% win rate` },
+    { v: gf,                             l:'Gol segnati',    s:`media ${(gf/n).toFixed(1)}/gara` },
+    { v: ga,                             l:'Gol subiti',     s:`media ${(ga/n).toFixed(1)}/gara` },
+    { v: allMatches.length,              l:'Partite',        s:'stagione corrente' },
+  ];
+
+  document.getElementById('kpiStrip').innerHTML = kpis.map(k=>`
+    <div class="kpi">
+      <div class="kpi-v">${k.v}</div>
+      <div class="kpi-l">${k.l}</div>
+      <div class="kpi-s">${k.s}</div>
+    </div>`).join('');
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────
+function renderCharts() {
+  const sorted = [...allMatches].reverse(); // cronologico
+  const labels = sorted.map(m => `vs ${m.opponent}`);
+
+  const axOpts = {
+    ticks: { color:'#7a90b0', font:{size:9} },
+    grid:  { color:'rgba(255,255,255,.05)' }
+  };
+  const legendOpts = { labels:{ color:'#7a90b0', font:{size:10}, boxWidth:10 } };
+
+  destroyChart('cGoals');
+  charts.goals = new Chart(document.getElementById('cGoals'), {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        { label:'Segnati', data:sorted.map(m=>m.goalsFor),    backgroundColor:'#1a7a42' },
+        { label:'Subiti',  data:sorted.map(m=>m.goalsAgainst), backgroundColor:'#b52222' },
+      ]
+    },
+    options:{ responsive:true, maintainAspectRatio:true,
+      plugins:{legend:legendOpts}, scales:{x:axOpts,y:{...axOpts,beginAtZero:true}} }
+  });
+
+  destroyChart('cShot');
+  charts.shot = new Chart(document.getElementById('cShot'), {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Shot %',
+        data: sorted.map(m=>m.teamStats.shotSuccessFor||0),
+        borderColor:'#E8B923', backgroundColor:'rgba(232,185,35,.12)',
+        fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#E8B923',
+      }]
+    },
+    options:{ responsive:true, maintainAspectRatio:true,
+      plugins:{legend:legendOpts}, scales:{x:axOpts,y:{...axOpts,min:0,max:100}} }
+  });
+
+  // G+A per player (da memberStats se disponibile, altrimenti da matches)
+  const aggStats = Object.keys(memberStats).length > 0
+    ? memberStats
+    : aggregateFromMatches();
+
+  const topGA = Object.values(aggStats).sort((a,b)=>b.ga-a.ga).slice(0,8);
+  destroyChart('cGA');
+  charts.ga = new Chart(document.getElementById('cGA'), {
+    type:'bar',
+    data:{
+      labels: topGA.map(p=>p.name),
+      datasets:[
+        { label:'Gol',   data:topGA.map(p=>p.goals),   backgroundColor:'#1a7a42', borderRadius:3 },
+        { label:'Assist',data:topGA.map(p=>p.assists),  backgroundColor:'#1B3A6B', borderRadius:3 },
+      ]
+    },
+    options:{ responsive:true, maintainAspectRatio:true, indexAxis:'y',
+      plugins:{legend:legendOpts},
+      scales:{ x:{...axOpts,stacked:true}, y:{...axOpts,stacked:true} } }
+  });
+
+  const topRating = Object.values(aggStats)
+    .filter(p=>p.apps>=2).sort((a,b)=>b.avgRating-a.avgRating).slice(0,8);
+  destroyChart('cRating');
+  charts.rating = new Chart(document.getElementById('cRating'), {
+    type:'bar',
+    data:{
+      labels: topRating.map(p=>p.name),
+      datasets:[{
+        label:'Rating medio',
+        data: topRating.map(p=>typeof p.avgRating==='number' ? +p.avgRating.toFixed(2) : p.avgRating),
+        backgroundColor: topRating.map(p=>
+          p.avgRating>=8.5?'#50d080':p.avgRating>=7.5?'#E8B923':'#ef7070'),
+        borderRadius: 4,
+      }]
+    },
+    options:{ responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{display:false}},
+      scales:{x:axOpts, y:{...axOpts,min:5,max:10}} }
+  });
+}
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ── MATCH CARDS ───────────────────────────────────────────────────────────
+function matchRowHTML(m) {
+  const rc = m.result==='W'?'W':m.result==='L'?'L':'D';
+  return `<div class="match-row" onclick="openMatch('${m.id}')">
+    <div class="result-box ${rc}">${rc}</div>
+    <div class="match-info">
+      <div class="match-opp">vs ${m.opponent}</div>
+      <div class="match-meta">${m.matchDate} · ${m.players.length} giocatori</div>
+    </div>
+    <div class="match-pills">
+      <span class="pill">⚽ ${m.teamStats.shotsFor||'?'} tiri</span>
+    </div>
+    <div class="match-score">${m.score}</div>
+  </div>`;
+}
+
+function renderRecent() {
+  document.getElementById('recentList').innerHTML =
+    allMatches.slice(0,5).map(matchRowHTML).join('');
+}
+function renderAllMatches() {
+  document.getElementById('matchCount').textContent = `${allMatches.length} partite`;
+  document.getElementById('allList').innerHTML = allMatches.map(matchRowHTML).join('');
+}
+
+// ── SQUAD ─────────────────────────────────────────────────────────────────
+function renderSquad() {
+  const agg = Object.keys(memberStats).length > 0
+    ? memberStats
+    : aggregateFromMatches();
+
+  const sorted = Object.values(agg).sort((a,b)=>b.ga-a.ga);
+  const medals = ['🥇','🥈','🥉'];
+
+  document.getElementById('squadGrid').innerHTML = sorted.map((p,i)=>`
+    <div class="player-card">
+      <div class="p-name">
+        ${i<3?`<span class="rank-badge">${medals[i]}</span>`:''}
+        ${p.name}
+      </div>
+      <div class="p-stats">
+        <div class="p-stat"><span class="v">${p.apps}</span><span class="l">Pres.</span></div>
+        <div class="p-stat"><span class="v">${p.goals}</span><span class="l">Gol</span></div>
+        <div class="p-stat"><span class="v">${p.assists}</span><span class="l">Assist</span></div>
+        <div class="p-stat"><span class="v">${p.ga}</span><span class="l">G+A</span></div>
+        <div class="p-stat">
+          <span class="v ${rClass(p.avgRating)}">${typeof p.avgRating==='number'?p.avgRating.toFixed(1):p.avgRating}</span>
+          <span class="l">Rating</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function rClass(r) {
+  const v = parseFloat(r);
+  return v>=8.5?'r-high':v>=7.5?'r-med':'r-low';
+}
+
+// ── AGGREGATE FROM MATCHES (fallback se memberStats vuoto) ────────────────
+function aggregateFromMatches() {
+  const agg = {};
+  allMatches.forEach(m => {
+    m.players.forEach(p => {
+      if (!agg[p.name]) agg[p.name] = { name:p.name, apps:0, goals:0, assists:0, ga:0, rSum:0, avgRating:0 };
+      const a = agg[p.name];
+      a.apps++; a.goals+=p.goals; a.assists+=p.assists; a.ga+=p.ga; a.rSum+=p.rating;
+    });
+  });
+  Object.values(agg).forEach(a => { a.avgRating = a.apps ? a.rSum/a.apps : 0; });
+  return agg;
+}
+
+// ── MATCH MODAL ───────────────────────────────────────────────────────────
+function openMatch(id) {
+  const m = allMatches.find(x=>x.id===id);
+  if (!m) return;
+
+  document.getElementById('modalTitle').textContent =
+    `FC Cannatello vs ${m.opponent}  ·  ${m.score}`;
+
+  const rc = m.result==='W'?'#1a7a42':m.result==='L'?'#b52222':'#c47a00';
+  const rl = m.result==='W'?'✅ VITTORIA':m.result==='L'?'❌ SCONFITTA':'➖ PAREGGIO';
+  const ts = m.teamStats;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="background:${rc};border-radius:10px;padding:8px 18px;
+        font-family:'Bebas Neue';font-size:28px;color:#fff">${m.score}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:${rc}">${rl}</div>
+        <div style="font-size:11px;color:var(--mid)">${m.matchDate}</div>
+      </div>
+    </div>
+
+    <div class="stat-bars">
+      ${sbar('Tiri', ts.shotsFor, '?', 1)}
+      ${sbar('Shot%', ts.shotSuccessFor, 100-ts.shotSuccessFor, 100)}
+      ${sbar('Possesso%', ts.possessionFor, 100-ts.possessionFor, 100)}
+    </div>
+
+    <div style="font-size:10px;color:var(--mid);text-transform:uppercase;
+      letter-spacing:.5px;margin-bottom:8px;font-weight:600">
+      Giocatori Cannatello
+    </div>
+
+    <table class="ptable">
+      <thead><tr>
+        <th>Giocatore</th><th>Rating</th><th>G</th><th>A</th><th>G+A</th><th>Pass%</th><th>Tck%</th>
+      </tr></thead>
+      <tbody>
+        ${m.players.map(p=>`
+          <tr ${p.motm?'class="motm"':''}>
+            <td>${p.name}${p.motm?' ⭐':''}</td>
+            <td><span class="${rClass(p.rating)}">${p.rating.toFixed(1)}</span></td>
+            <td>${p.goals}</td><td>${p.assists}</td>
+            <td><strong>${p.ga}</strong></td>
+            <td>${p.passSuccess}</td><td>${p.tackleSuccess}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+function sbar(label, v, opp, tot) {
+  const pct = tot>0 ? Math.min(100, Math.round(v/(+v + +opp || tot)*100)) : 50;
+  return `<div class="sbar">
+    <div class="sbar-label">${label}</div>
+    <div class="sbar-vals">
+      <span class="for">Can ${v}${label.includes('%')?'%':''}</span>
+      <span class="aga">${opp}${label.includes('%')?'%':''} Avv</span>
+    </div>
+    <div class="sbar-track"><div class="sbar-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('open');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function show(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach((b,i)=>{
+    b.classList.toggle('active', ['dashboard','matches','squad'][i]===name);
+  });
+  document.getElementById('view-'+name).classList.add('active');
+}
+
+function showLoader(on) {
+  document.getElementById('loaderWrap').style.display = on ? 'flex' : 'none';
+}
+
+function showError(msg) {
+  const b = document.getElementById('errorBannerDash');
+  b.innerHTML = `
+    <strong>⚠️ Impossibile caricare i dati EA Sports</strong><br>
+    ${msg}<br><br>
+    <strong>Soluzione:</strong> Questa web app deve essere hostata su un dominio con accesso a
+    <code>proclubs.ea.com</code>. In locale, il browser blocca le richieste cross-origin.<br>
+    Pubblica su <a href="https://firebase.google.com/docs/hosting" target="_blank"
+    style="color:var(--gold)">Firebase Hosting</a> o
+    <a href="https://vercel.com" target="_blank" style="color:var(--gold)">Vercel</a> e funzionerà.
+    <br><br>
+    <em>In alternativa, usa l'estensione Chrome per aggirare il limite CORS.</em>`;
+  b.classList.add('show');
+  show('dashboard');
+}
+</script>
+</body>
+</html>
