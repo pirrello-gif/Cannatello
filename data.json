@@ -1,0 +1,103 @@
+{
+  "club": {
+    "name": "FC Cannatello",
+    "league": "Southern Europe",
+    "platform": "Current Gen",
+    "skillRating": 1250,
+    "wins": 18,
+    "losses": 6,
+    "draws": 2,
+    "lastUpdated": "2026-03-03"
+  },
+  "matches": [
+    {
+      "id": "m001", "date": "2026-03-03", "opponent": "Paris Gotham",
+      "score": "4-2", "result": "W", "goalsFor": 4, "goalsAgainst": 2,
+      "stats": { "shots": 6, "shotSuccess": 67, "passSuccess": 77, "possession": 55 },
+      "players": [
+        {"name":"piertamb","rating":8.9,"goals":3,"assists":0,"passSuccess":"59%","tackleSuccess":"50%","motm":true},
+        {"name":"ekasemu","rating":7.7,"goals":0,"assists":1,"passSuccess":"93%","tackleSuccess":"25%","motm":false},
+        {"name":"FanelsLeclerc98","rating":7.7,"goals":1,"assists":0,"passSuccess":"79%","tackleSuccess":"33%","motm":false},
+        {"name":"drummer7i","rating":7.0,"goals":0,"assists":0,"passSuccess":"91%","tackleSuccess":"50%","motm":false},
+        {"name":"Pipaers","rating":6.9,"goals":0,"assists":1,"passSuccess":"87%","tackleSuccess":"33%","motm":false},
+        {"name":"SAGAT92100","rating":6.9,"goals":0,"assists":0,"passSuccess":"67%","tackleSuccess":"100%","motm":false},
+        {"name":"RedEagle1912","rating":7.2,"goals":0,"assists":0,"passSuccess":"86%","tackleSuccess":"50%","motm":false},
+        {"name":"Rob_ut09","rating":6.7,"goals":0,"assists":0,"passSuccess":"53%","tackleSuccess":"50%","motm":false}
+      ]
+    },
+    {
+      "id": "m002", "date": "2026-03-03", "opponent": "Arca do Noe",
+      "score": "4-1", "result": "W", "goalsFor": 4, "goalsAgainst": 1,
+      "stats": { "shots": 6, "shotSuccess": 67, "passSuccess": 86, "possession": 60 },
+      "players": [
+        {"name":"Pipaers","rating":9.2,"goals":2,"assists":1,"passSuccess":"100%","tackleSuccess":"0%","motm":true},
+        {"name":"drummer7i","rating":9.0,"goals":0,"assists":1,"passSuccess":"88%","tackleSuccess":"100%","motm":false},
+        {"name":"piertamb","rating":9.0,"goals":2,"assists":1,"passSuccess":"78%","tackleSuccess":"0%","motm":false},
+        {"name":"FanelsLeclerc98","rating":7.5,"goals":0,"assists":1,"passSuccess":"92%","tackleSuccess":"0%","motm":false},
+        {"name":"RedEagle1912","rating":7.4,"goals":0,"assists":0,"passSuccess":"100%","tackleSuccess":"0%","motm":false},
+        {"name":"ekasemu","rating":7.0,"goals":0,"assists":0,"passSuccess":"100%","tackleSuccess":"0%","motm":false}
+      ]
+    },
+    {
+      "id": "m003", "date": "2026-03-03", "opponent": "JT",
+      "score": "5-1", "result": "W", "goalsFor": 5, "goalsAgainst": 1,
+      "stats": { "shots": 8, "shotSuccess": 63, "passSuccess": 77, "possession": 52 },
+      "players": [
+        {"name":"Pipaers","rating":9.3,"goals":3,"assists":1,"passSuccess":"100%","tackleSuccess":"33%","motm":true},
+        {"name":"piertamb","rating":8.6,"goals":1,"assists":2,"passSuccess":"82%","tackleSuccess":"0%","motm":false},
+        {"name":"FanelsLeclerc98","rating":7.4,"goals":1,"assists":0,"passSuccess":"60%","tackleSuccess":"50%","motm":false},
+        {"name":"drummer7i","rating":7.3,"goals":0,"assists":0,"passSuccess":"100%","tackleSuccess":"100%","motm":false},
+        {"name":"ekasemu","rating":6.9,"goals":0,"assists":1,"passSuccess":"73%","tackleSuccess":"50%","motm":false},
+        {"name":"Matei5996","rating":7.4,"goals":0,"assists":0,"passSuccess":"71%","tackleSuccess":"0%","motm":false}
+      ]
+    },
+    {
+      "id": "m004", "date": "2026-03-03", "opponent": "Ntouma",
+      "score": "3-4", "result": "L", "goalsFor": 3, "goalsAgainst": 4,
+      "stats": { "shots": 12, "shotSuccess": 25, "passSuccess": 82, "possession": 62 },
+      "players": [
+        {"name":"Pipaers","rating":9.0,"goals":1,"assists":2,"passSuccess":"87%","tackleSuccess":"0%","motm":true},
+        {"name":"drummer7i","rating":8.4,"goals":1,"assists":0,"passSuccess":"100%","tackleSuccess":"0%","motm":false},
+        {"name":"piertamb","rating":8.3,"goals":1,"assists":1,"passSuccess":"86%","tackleSuccess":"0%","motm":false},
+        {"name":"RedEagle1912","rating":7.8,"goals":0,"assists":0,"passSuccess":"94%","tackleSuccess":"67%","motm":false},
+        {"name":"ekasemu","rating":7.0,"goals":0,"assists":0,"passSuccess":"71%","tackleSuccess":"33%","motm":false}
+      ]
+    },
+    {
+      "id": "m005", "date": "2026-03-03", "opponent": "Cassaulet",
+      "score": "2-0", "result": "W", "goalsFor": 2, "goalsAgainst": 0,
+      "stats": { "shots": 15, "shotSuccess": 13, "passSuccess": 80, "possession": 56 },
+      "players": [
+        {"name":"FanelsLeclerc98","rating":7.5,"goals":1,"assists":0,"passSuccess":"88%","tackleSuccess":"0%","motm":true},
+        {"name":"Rob_ut09","rating":7.3,"goals":0,"assists":0,"passSuccess":"74%","tackleSuccess":"0%","motm":false},
+        {"name":"piertamb","rating":7.2,"goals":0,"assists":0,"passSuccess":"75%","tackleSuccess":"50%","motm":false},
+        {"name":"Pipaers","rating":6.9,"goals":0,"assists":1,"passSuccess":"72%","tackleSuccess":"0%","motm":false},
+        {"name":"drummer7i","rating":3.0,"goals":1,"assists":0,"passSuccess":"100%","tackleSuccess":"0%","motm":false}
+      ]
+    },
+    {
+      "id": "m006", "date": "2026-03-03", "opponent": "Nix",
+      "score": "1-0", "result": "W", "goalsFor": 1, "goalsAgainst": 0,
+      "stats": { "shots": 6, "shotSuccess": 17, "passSuccess": 79, "possession": 51 },
+      "players": [
+        {"name":"Rob_ut09","rating":8.0,"goals":0,"assists":0,"passSuccess":"82%","tackleSuccess":"50%","motm":false},
+        {"name":"Pipaers","rating":7.4,"goals":1,"assists":0,"passSuccess":"94%","tackleSuccess":"0%","motm":true},
+        {"name":"Matei5996","rating":7.2,"goals":0,"assists":0,"passSuccess":"82%","tackleSuccess":"0%","motm":false},
+        {"name":"piertamb","rating":6.9,"goals":0,"assists":1,"passSuccess":"86%","tackleSuccess":"0%","motm":false},
+        {"name":"FanelsLeclerc98","rating":3.0,"goals":0,"assists":0,"passSuccess":"67%","tackleSuccess":"0%","motm":false}
+      ]
+    },
+    {
+      "id": "m007", "date": "2026-03-03", "opponent": "Otaboca",
+      "score": "4-5", "result": "L", "goalsFor": 2, "goalsAgainst": 5,
+      "stats": { "shots": 11, "shotSuccess": 18, "passSuccess": 83, "possession": 57 },
+      "players": [
+        {"name":"piertamb","rating":10.0,"goals":2,"assists":1,"passSuccess":"83%","tackleSuccess":"50%","motm":true},
+        {"name":"Matei5996","rating":7.8,"goals":0,"assists":0,"passSuccess":"62%","tackleSuccess":"0%","motm":false},
+        {"name":"Pipaers","rating":7.4,"goals":0,"assists":2,"passSuccess":"94%","tackleSuccess":"0%","motm":false},
+        {"name":"Rob_ut09","rating":7.0,"goals":0,"assists":0,"passSuccess":"88%","tackleSuccess":"0%","motm":false},
+        {"name":"rururu92","rating":3.0,"goals":0,"assists":0,"passSuccess":"67%","tackleSuccess":"0%","motm":false}
+      ]
+    }
+  ]
+}
