@@ -408,140 +408,77 @@ window.addEventListener('load', () => loadAll());
 async function loadAll() {
   showLoader(true);
   try {
-    const [matches, members, overall] = await Promise.all([
-      fetchEA(`/clubs/matches?platform=${PLATFORM}&clubId=${CLUB_ID}&matchType=gameType9&maxResultCount=20`),
-      fetchEA(`/members/career/stats?platform=${PLATFORM}&clubId=${CLUB_ID}`),
-      fetchEA(`/clubs/overallStats?platform=${PLATFORM}&clubIds=${CLUB_ID}`),
-    ]);
+    // Carica i dati da data.json (stesso repo GitHub/Vercel)
+    const res = await fetch('./data.json');
+    if (!res.ok) throw new Error('data.json non trovato');
+    const data = await res.json();
 
-    allMatches  = parseMatches(matches);
-    memberStats = parseMembers(members);
-    clubOverall = parseOverall(overall);
+    allMatches  = normalizeMatches(data.matches || []);
+    memberStats = buildMemberStats(allMatches);
+    clubOverall = data.club || {};
 
     showLoader(false);
     show('dashboard');
     renderAll();
     document.getElementById('lastUpdated').textContent =
-      `Dati aggiornati: ${new Date().toLocaleString('it-IT')} · Fonte: EA Sports API`;
-    document.getElementById('liveLabel').textContent = 'Aggiornato';
+      `Ultimo aggiornamento: ${data.club?.lastUpdated || 'n/d'} · ${allMatches.length} partite caricate`;
+    document.getElementById('liveLabel').textContent = 'Dati locali';
   } catch(e) {
     showLoader(false);
     showError(e.message);
   }
 }
 
-// ── FETCH — prova proclubs.ea.com diretto, fallback su corsproxy ──────────
-async function fetchEA(path) {
-  const eaUrl = `https://proclubs.ea.com/api/fc${path}`;
-  // prova diretta (funziona se il browser ha già i cookie EA)
-  try {
-    const r1 = await fetch(eaUrl, {
-      credentials: 'include',
-      headers: { 'Accept': 'application/json', 'Referer': 'https://www.ea.com/' }
-    });
-    if (r1.ok) return r1.json();
-  } catch(_) {}
-
-  // fallback: corsproxy.io (proxy CORS pubblico, non richiede auth)
-  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(eaUrl)}`;
-  const r2 = await fetch(proxyUrl);
-  if (!r2.ok) throw new Error(`EA API non raggiungibile (${r2.status})`);
-  return r2.json();
-}
-
 // ── PARSERS ───────────────────────────────────────────────────────────────
-function parseMatches(data) {
-  // La risposta EA ha forma: [ { matchId, timestamp, clubs:{}, players:{} }, ... ]
-  // oppure { matchLog: [...] }
-  const raw = Array.isArray(data) ? data : (data.matchLog || data.matches || []);
-  return raw.map(m => {
-    const myClub = m.clubs?.[CLUB_ID] || Object.values(m.clubs || {})[0] || {};
-    const oppEntry = Object.entries(m.clubs || {}).find(([id]) => id !== CLUB_ID);
-    const oppClub = oppEntry?.[1] || {};
-    const oppName = oppClub.details?.name || oppClub.name || `Club ${oppEntry?.[0] || '?'}`;
-
-    const gf = parseInt(myClub.goals ?? myClub.score ?? 0);
-    const ga = parseInt(myClub.goalsAgainst ?? oppClub.goals ?? oppClub.score ?? 0);
-    const result = myClub.result === '1' || myClub.wins === '1' ? 'W'
-                 : myClub.result === '2' || myClub.losses === '1' ? 'L' : 'D';
-
-    // Giocatori del nostro club
-    const myPlayers = m.players?.[CLUB_ID] || {};
-    const players = Object.values(myPlayers)
-      .map(p => ({
-        name:          p.playername || p.name || '?',
-        rating:        parseFloat(p.rating || 0),
-        goals:         parseInt(p.goals || 0),
-        assists:       parseInt(p.assists || 0),
-        ga:            parseInt(p.goals || 0) + parseInt(p.assists || 0),
-        passSuccess:   p.passattempts > 0
-                         ? Math.round(p.passesmade/p.passattempts*100) + '%'
-                         : (p.passPercentage ? p.passPercentage+'%' : '-'),
-        tackleSuccess: p.tackleattempts > 0
-                         ? Math.round(p.tacklesmade/p.tackleattempts*100) + '%'
-                         : (p.tacklePercentage ? p.tacklePercentage+'%' : '-'),
-        motm:          p.manofthematch === '1' || p.motm === '1',
-        pos:           p.position || '',
-      }))
-      .filter(p => ROSTER.size === 0 || ROSTER.has(p.name))
-      .sort((a,b) => b.rating - a.rating);
-
-    const ts = parseInt(m.timestamp || m.matchTimestamp || 0);
-    return {
-      id:        m.matchId || String(ts),
-      timestamp: ts,
-      matchDate: ts ? new Date(ts * 1000).toLocaleDateString('it-IT', {
-        weekday:'short', day:'numeric', month:'short', year:'numeric'
-      }) : 'Data n/d',
-      opponent:  oppName,
-      score:     `${gf}-${ga}`,
-      goalsFor:  gf,
-      goalsAgainst: ga,
-      result,
-      teamStats: {
-        shotSuccessFor:  myClub.shotPct  || (myClub.shots > 0 ? Math.round(myClub.goals/myClub.shots*100) : 0),
-        passSuccessFor:  myClub.passPct  || 0,
-        possessionFor:   myClub.possession || 0,
-        tackleSuccessFor:myClub.tacklePct || 0,
-        shotsFor:        myClub.shots || 0,
-      },
-      players,
-    };
-  }).sort((a,b) => b.timestamp - a.timestamp);
+// ── PARSERS (formato data.json) ───────────────────────────────────────────
+// I match in data.json hanno già il formato corretto, li normalizziamo solo
+function normalizeMatches(matches) {
+  return matches.map(m => ({
+    id:           m.id,
+    timestamp:    0,
+    matchDate:    m.date ? new Date(m.date).toLocaleDateString('it-IT', {
+                    weekday:'short', day:'numeric', month:'short', year:'numeric'
+                  }) : 'Data n/d',
+    opponent:     m.opponent,
+    score:        m.score,
+    goalsFor:     m.goalsFor,
+    goalsAgainst: m.goalsAgainst,
+    result:       m.result,
+    teamStats: {
+      shotsFor:       m.stats?.shots || 0,
+      shotSuccessFor: m.stats?.shotSuccess || 0,
+      passSuccessFor: m.stats?.passSuccess || 0,
+      possessionFor:  m.stats?.possession || 0,
+    },
+    players: (m.players || []).map(p => ({
+      name:          p.name,
+      rating:        p.rating,
+      goals:         p.goals,
+      assists:       p.assists,
+      ga:            p.goals + p.assists,
+      passSuccess:   p.passSuccess || '-',
+      tackleSuccess: p.tackleSuccess || '-',
+      motm:          p.motm || false,
+    })).sort((a,b) => b.rating - a.rating),
+  }));
 }
 
-function parseMembers(data) {
-  // { members: [ { name, proName, goals, assists, rating, gamesPlayed, ... } ] }
-  const list = data.members || data || [];
-  const stats = {};
-  list.forEach(p => {
-    const name = p.proName || p.name || p.playername || '?';
-    if (ROSTER.size > 0 && !ROSTER.has(name)) return;
-    stats[name] = {
-      name,
-      apps:      parseInt(p.gamesPlayed || p.appearances || 0),
-      goals:     parseInt(p.goals || 0),
-      assists:   parseInt(p.assists || 0),
-      ga:        parseInt(p.goals || 0) + parseInt(p.assists || 0),
-      avgRating: parseFloat(p.rating || 0),
-      wins:      parseInt(p.wins || 0),
-      passSuccess: p.passPercentage ? `${p.passPercentage}%` : '-',
-      pos:       p.position || '',
-    };
+// Costruisce le statistiche aggregate per giocatore dai match
+function buildMemberStats(matches) {
+  const agg = {};
+  matches.forEach(m => {
+    m.players.forEach(p => {
+      if (!agg[p.name]) agg[p.name] = {
+        name:p.name, apps:0, goals:0, assists:0, ga:0, rSum:0, avgRating:0, wins:0
+      };
+      const a = agg[p.name];
+      a.apps++; a.goals+=p.goals; a.assists+=p.assists;
+      a.ga+=p.ga; a.rSum+=p.rating;
+      if (m.result==='W') a.wins++;
+    });
   });
-  return stats;
-}
-
-function parseOverall(data) {
-  const club = Array.isArray(data) ? data[0] : (data[CLUB_ID] || data);
-  return {
-    wins:    parseInt(club?.wins || 0),
-    losses:  parseInt(club?.losses || 0),
-    draws:   parseInt(club?.ties || club?.draws || 0),
-    goals:   parseInt(club?.goals || 0),
-    gamesPlayed: parseInt(club?.gamesPlayed || 0),
-    skillRating: parseInt(club?.skillRating || club?.rating || 0),
-  };
+  Object.values(agg).forEach(a => { a.avgRating = a.apps ? a.rSum/a.apps : 0; });
+  return agg;
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────
@@ -555,7 +492,7 @@ function renderAll() {
 
 // ── KPIs ──────────────────────────────────────────────────────────────────
 function renderKPIs() {
-  const W = allMatches.filter(m=>m.result==='W').length;
+  const W = clubOverall.wins || allMatches.filter(m=>m.result==='W').length;
   const L = allMatches.filter(m=>m.result==='L').length;
   const D = allMatches.filter(m=>m.result==='D').length;
   const gf = allMatches.reduce((s,m)=>s+m.goalsFor,0);
@@ -563,7 +500,7 @@ function renderKPIs() {
   const n  = allMatches.length || 1;
 
   const kpis = [
-    { v: clubOverall.skillRating || '—', l:'Skill Rating',  s:'classifiche EA' },
+    { v: clubOverall.skillRating || '—', l:'Skill Rating', s:'classifiche EA' },
     { v: `${W}W·${D}D·${L}L`,           l:'Record',         s:`${Math.round(W/n*100)}% win rate` },
     { v: gf,                             l:'Gol segnati',    s:`media ${(gf/n).toFixed(1)}/gara` },
     { v: ga,                             l:'Gol subiti',     s:`media ${(ga/n).toFixed(1)}/gara` },
@@ -622,7 +559,7 @@ function renderCharts() {
   // G+A per player (da memberStats se disponibile, altrimenti da matches)
   const aggStats = Object.keys(memberStats).length > 0
     ? memberStats
-    : aggregateFromMatches();
+    : buildMemberStats(allMatches);
 
   const topGA = Object.values(aggStats).sort((a,b)=>b.ga-a.ga).slice(0,8);
   destroyChart('cGA');
@@ -692,9 +629,7 @@ function renderAllMatches() {
 
 // ── SQUAD ─────────────────────────────────────────────────────────────────
 function renderSquad() {
-  const agg = Object.keys(memberStats).length > 0
-    ? memberStats
-    : aggregateFromMatches();
+  const agg = Object.keys(memberStats).length > 0 ? memberStats : buildMemberStats(allMatches);
 
   const sorted = Object.values(agg).sort((a,b)=>b.ga-a.ga);
   const medals = ['🥇','🥈','🥉'];
@@ -723,19 +658,6 @@ function rClass(r) {
   return v>=8.5?'r-high':v>=7.5?'r-med':'r-low';
 }
 
-// ── AGGREGATE FROM MATCHES (fallback se memberStats vuoto) ────────────────
-function aggregateFromMatches() {
-  const agg = {};
-  allMatches.forEach(m => {
-    m.players.forEach(p => {
-      if (!agg[p.name]) agg[p.name] = { name:p.name, apps:0, goals:0, assists:0, ga:0, rSum:0, avgRating:0 };
-      const a = agg[p.name];
-      a.apps++; a.goals+=p.goals; a.assists+=p.assists; a.ga+=p.ga; a.rSum+=p.rating;
-    });
-  });
-  Object.values(agg).forEach(a => { a.avgRating = a.apps ? a.rSum/a.apps : 0; });
-  return agg;
-}
 
 // ── MATCH MODAL ───────────────────────────────────────────────────────────
 function openMatch(id) {
