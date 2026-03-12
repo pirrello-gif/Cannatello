@@ -55,7 +55,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
 .mr{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .18s}
 .mr:hover{border-color:#cc1a1a;transform:translateX(3px);background:var(--card2)}
 .rb{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:#fff;flex-shrink:0}
-.rb.W{background:#22c55e}.rb.L{background:#e02020}.rb.D{background:#f5c518}
+.rb.W{background:#22c55e}.rb.L{background:#e02020}.rb.D{background:#f5c518;color:#111}
 .mi{flex:1;min-width:0}.miopp{font-size:14px;font-weight:700;color:#e8f0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mimeta{font-size:10px;color:#7a8fa0;margin-top:2px}
 .mscore{font-family:'Barlow Condensed';font-size:22px;font-weight:900;color:#e8f0f5;flex-shrink:0}
@@ -109,12 +109,13 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
 .fd{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-size:13px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0}
 .fd.W{background:#22c55e}.fd.L{background:#e02020}.fd.D{background:#f5c518}
 .lb{display:flex;flex-direction:column;gap:5px}
-.lbr{display:flex;align-items:center;gap:10px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;transition:all .18s}
-.lbr:hover{border-color:#cc1a1a}
-.lbrank{font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:var(--dim);width:24px;flex-shrink:0}
-.lbrank.t{color:#f5c518}.lbname{flex:1;font-size:13px;font-weight:700;color:#e8f0f5}
-.lbval{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:#f5c518}
-.lbsub{font-size:10px;color:#7a8fa0;text-align:right}
+.lbr{display:flex;align-items:center;gap:12px;background:#1a1212;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;transition:all .18s}
+.lbr:hover{border-color:#cc1a1a;background:#221515}
+.lbrank{font-family:'Barlow Condensed';font-size:20px;font-weight:900;color:#4a3a3a;width:26px;flex-shrink:0;text-align:center}
+.lbrank.t{color:#f5c518}
+.lbname{flex:1;font-size:14px;font-weight:700;color:#f0f0f0}
+.lbval{font-family:'Barlow Condensed';font-size:24px;font-weight:900;color:#f5c518;min-width:40px;text-align:right}
+.lbsub{font-size:10px;color:#8a9ab0;text-align:right;margin-top:1px}
 .fbar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .fb{padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:#8fa8bc;font-size:11px;font-weight:600;cursor:pointer;font-family:'Barlow';transition:all .2s}
 .fb:hover{border-color:#cc1a1a;color:#f5c518}.fb.active{background:rgba(204,26,26,.15);border-color:#cc1a1a;color:#f5c518}
@@ -391,17 +392,65 @@ function calcStreak(){
 function renderCharts(){
   const s=[...AM].reverse();
   const labs=s.map(m=>'vs '+m.opp.slice(0,9));
-  const ax={ticks:{color:'#7a8fa0',font:{size:8}},grid:{color:'rgba(255,255,255,.04)'}};
-  const leg={labels:{color:'#5a7090',font:{size:9},boxWidth:8}};
-  dc('cGoals');CHARTS.g=new Chart(document.getElementById('cGoals'),{type:'bar',data:{labels:labs,datasets:[{label:'Segnati',data:s.map(m=>m.gf),backgroundColor:'#cc1a1a',borderRadius:3},{label:'Subiti',data:s.map(m=>m.ga),backgroundColor:'#e02020',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg},scales:{x:ax,y:{...ax,beginAtZero:true}}}});
-  dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',data:{labels:labs,datasets:[{label:'Rating',data:s.map(m=>+(m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1)).toFixed(2)),borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#f5c518'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:4,max:10}}}});
+  const ax={ticks:{color:'#8a9ab0',font:{size:8}},grid:{color:'rgba(255,255,255,.06)'}};
+  const leg={labels:{color:'#c0ccd8',font:{size:10},boxWidth:10,padding:16}};
+
+  // Gol segnati (verde) vs subiti (rosso) — ben distinguibili
+  dc('cGoals');CHARTS.g=new Chart(document.getElementById('cGoals'),{type:'bar',
+    data:{labels:labs,datasets:[
+      {label:'Segnati',data:s.map(m=>m.gf),backgroundColor:'#22c55e',borderRadius:3},
+      {label:'Subiti', data:s.map(m=>m.ga),backgroundColor:'#e02020',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg},scales:{x:ax,y:{...ax,beginAtZero:true}}}
+  });
+
+  // Rating medio — oro
+  dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',
+    data:{labels:labs,datasets:[{label:'Rating',
+      data:s.map(m=>+(m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1)).toFixed(2)),
+      borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#f5c518'
+    }]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:4,max:10}}}
+  });
+
+  // Top G+A — verde gol, gold assist
   const t8=Object.values(MS).sort((a,b)=>b.ga-a.ga).slice(0,8);
-  dc('cGA');CHARTS.ga=new Chart(document.getElementById('cGA'),{type:'bar',data:{labels:t8.map(p=>p.name),datasets:[{label:'Gol',data:t8.map(p=>p.goals),backgroundColor:'#cc1a1a',borderRadius:3},{label:'Assist',data:t8.map(p=>p.assists),backgroundColor:'#1d4ed8',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:leg},scales:{x:{...ax,stacked:true},y:{...ax,stacked:true}}}});
-  dc('cShot');CHARTS.sh=new Chart(document.getElementById('cShot'),{type:'line',data:{labels:labs,datasets:[{label:'Conv%',data:s.map(m=>m.shotConv),borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#60a5fa'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:0,max:100}}}});
+  dc('cGA');CHARTS.ga=new Chart(document.getElementById('cGA'),{type:'bar',
+    data:{labels:t8.map(p=>p.name),datasets:[
+      {label:'Gol',   data:t8.map(p=>p.goals),  backgroundColor:'#22c55e',borderRadius:3},
+      {label:'Assist',data:t8.map(p=>p.assists),backgroundColor:'#f5c518',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:leg},scales:{x:{...ax,stacked:true},y:{...ax,stacked:true}}}
+  });
+
+  // Shot conversion — azzurro
+  dc('cShot');CHARTS.sh=new Chart(document.getElementById('cShot'),{type:'line',
+    data:{labels:labs,datasets:[{label:'Conv%',
+      data:s.map(m=>m.shotConv),
+      borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#60a5fa'
+    }]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:0,max:100}}}
+  });
+
+  // Distribuzione risultati — verde/giallo/rosso
   const W=AM.filter(m=>m.res==='W').length,L=AM.filter(m=>m.res==='L').length,D2=AM.filter(m=>m.res==='D').length;
-  dc('cPie');CHARTS.pie=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{data:[W,D2,L],backgroundColor:['#cc1a1a','#d97706','#e02020'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg}}});
+  dc('cPie');CHARTS.pie=new Chart(document.getElementById('cPie'),{type:'doughnut',
+    data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{
+      data:[W,D2,L],
+      backgroundColor:['#22c55e','#f5c518','#e02020'],
+      borderWidth:2,borderColor:'#0d0d0d'
+    }]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:leg}}
+  });
+
+  // Tiri/gara — viola
   const ts8=Object.values(MS).filter(p=>p.apps>=3).sort((a,b)=>b.avgShots-a.avgShots).slice(0,8);
-  dc('cShots');CHARTS.shots=new Chart(document.getElementById('cShots'),{type:'bar',data:{labels:ts8.map(p=>p.name),datasets:[{label:'Tiri/gara',data:ts8.map(p=>+p.avgShots.toFixed(1)),backgroundColor:'#7c3aed',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:ax,y:ax}}});
+  dc('cShots');CHARTS.shots=new Chart(document.getElementById('cShots'),{type:'bar',
+    data:{labels:ts8.map(p=>p.name),datasets:[{label:'Tiri/gara',
+      data:ts8.map(p=>+p.avgShots.toFixed(1)),backgroundColor:'#a855f7',borderRadius:3
+    }]},
+    options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:ax,y:ax}}
+  });
 }
 function dc(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}}
 
@@ -461,8 +510,27 @@ window.fpos=fpos;
 /* ─── LEADERBOARDS ─── */
 function renderLeaderboards(){
   const ps=Object.values(MS);
-  const M=['🥇','🥈','🥉'];
-  function lb(id,arr){document.getElementById(id).innerHTML=arr.map((p,i)=>'<div class="lbr"><div class="lbrank '+(i<3?'t':'')+'>'+(M[i]||i+1)+'</div><div class="lbname">'+p.name+'</div><div><div class="lbval">'+p.val+'</div><div class="lbsub">'+p.sub+'</div></div></div>').join('');}
+  const rankColors=['#f5c518','#c0c0c0','#cd7f32'];
+  const rankBg=['rgba(245,197,24,.15)','rgba(192,192,192,.1)','rgba(205,127,50,.1)'];
+
+  function lb(id,arr){
+    document.getElementById(id).innerHTML=arr.map((p,i)=>{
+      const isTop=i<3;
+      const rankStyle=isTop
+        ?'background:'+rankBg[i]+';color:'+rankColors[i]+';border:1px solid '+rankColors[i]+'44;'
+        :'background:rgba(255,255,255,.04);color:#4a5a6a;border:1px solid transparent;';
+      const rowBg=isTop?'background:#1e1510;border-color:rgba(245,197,24,.2)':'';
+      return '<div class="lbr" style="'+rowBg+'">'
+        +'<div style="'+rankStyle+'width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\';font-size:15px;font-weight:900;flex-shrink:0">'+(i<3?['1°','2°','3°'][i]:i+1)+'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:700;color:#f0f0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'
+        +'<div style="font-size:10px;color:#8a9ab0;margin-top:1px">'+p.sub+'</div>'
+        +'</div>'
+        +'<div style="font-family:\'Barlow Condensed\';font-size:26px;font-weight:900;color:'+(isTop?rankColors[i]:'#d0c060')+';flex-shrink:0;min-width:44px;text-align:right">'+p.val+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
   lb('lbG',[...ps].sort((a,b)=>b.goals-a.goals).slice(0,8).map(p=>({name:p.name,val:p.goals,sub:p.apps+' pres · '+p.avgR.toFixed(1)+' avg'})));
   lb('lbA',[...ps].sort((a,b)=>b.assists-a.assists).slice(0,8).map(p=>({name:p.name,val:p.assists,sub:p.secondAssists+' pre-assist'})));
   lb('lbR',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgR-a.avgR).slice(0,8).map(p=>({name:p.name,val:p.avgR.toFixed(2),sub:p.apps+' pres · ±'+p.cons.toFixed(2)})));
@@ -529,7 +597,7 @@ function openMatch(id){
   const m=AM.find(x=>x.id===id);if(!m)return;
   document.getElementById('mtit').textContent='vs '+m.opp+' · '+m.score+' · '+m.date;
 
-  const rc=m.res==='W'?'#cc1a1a':m.res==='L'?'#e02020':'#d97706';
+  const rc=m.res==='W'?'#22c55e':m.res==='L'?'#e02020':'#f5c518';
   const rl=m.res==='W'?'✅ VITTORIA':m.res==='L'?'❌ SCONFITTA':'➖ PAREGGIO';
   const motm=m.ps.find(p=>p.motm);
   const n=m.ps.length||1;
