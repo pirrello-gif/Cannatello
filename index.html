@@ -895,8 +895,27 @@ function openPlayer(name){
   const radarData=buildRadar(p);
   new Chart(document.getElementById('pradar'),{
     type:'radar',
-    data:{labels:radarData.labels,datasets:[{data:radarData.values,backgroundColor:'rgba(245,197,24,.12)',borderColor:'#f5c518',pointBackgroundColor:'#f5c518',pointRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:true,scales:{r:{ticks:{display:false,stepSize:20},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'#a8c0e0',font:{size:9}},min:0,max:100}},plugins:{legend:{display:false}}}
+    data:{labels:radarData.labels,datasets:[{
+      data:radarData.values,
+      backgroundColor:'rgba(204,26,26,.15)',
+      borderColor:'#f5c518',
+      borderWidth:2,
+      pointBackgroundColor:'#f5c518',
+      pointBorderColor:'#0d0d0d',
+      pointRadius:4
+    }]},
+    options:{
+      responsive:true,
+      maintainAspectRatio:true,
+      scales:{r:{
+        ticks:{display:false,stepSize:20},
+        grid:{color:'rgba(255,255,255,.15)'},
+        angleLines:{color:'rgba(255,255,255,.1)'},
+        pointLabels:{color:'#d0dde6',font:{size:10,weight:'600'}},
+        min:0,max:100
+      }},
+      plugins:{legend:{display:false}}
+    }
   });
 
   // TREND CHART
@@ -916,20 +935,80 @@ function sr(l,v,sub,c){return '<div class="srow"><span class="srl">'+l+'</span><
 function rcol(r){return r>=8.5?'color:#f5c518':r>=7?'color:#f5c518':'color:#e02020';}
 
 function buildRadar(p){
-  const pos=p.pos;
-  // Normalize 0-100
-  const norm=(v,max)=>Math.min(100,Math.round(v/max*100));
-  if(pos==='goalkeeper'){
-    return{labels:['Parate','Rating','Cleansh.','Pass%','Distrib.','Presence'],values:[norm(p.saves,30),norm(p.avgR,10)*10,norm(p.cleansheets,10)*10,p.passPct??50,norm(p.passesmade,200),norm(p.apps,AM.length)*100]};
+  // Cap dinamici: prende il massimo reale della squadra, poi normalizza su 100
+  // Così il migliore della squadra = 100, gli altri in proporzione
+  const all=Object.values(MS);
+  const maxOf=key=>Math.max(...all.map(x=>x[key]||0))||1;
+  const n=(v,max)=>Math.min(100,Math.max(0,Math.round((v/(max||1))*100)));
+
+  // Caps dal dataset reale
+  const capGoals90 = maxOf('goals90');
+  const capGA      = maxOf('ga');
+  const capShots   = maxOf('avgShots');
+  const capDrib    = maxOf('avgDrib');
+  const capInt     = maxOf('avgInt');
+  const capGA90    = maxOf('ga90');
+  const capSaves   = maxOf('saves');
+  const capCS      = maxOf('cleansheets');
+  const capApps    = AM.length||1;
+
+  // Rating normalizzato: 0-10 → 0-100 con floor a 5 (nessuno gioca sotto)
+  const nRating = r => Math.min(100, Math.max(0, Math.round(((r - 5) / 5) * 100)));
+  // Pass% già 0-100, ma normalizziamo sul max squadra per dare più differenziazione
+  const maxPass = maxOf('passPct')||100;
+  const nPass = v => n(v??0, maxPass);
+
+  if(p.pos==='goalkeeper'){
+    return{
+      labels:['Parate/g','Rating','Clean Sheet','Pass%','Distribuzioni','Presenze'],
+      values:[
+        n(p.saves/Math.max(p.apps,1), maxOf('saves')/Math.max(maxOf('apps'),1)),
+        nRating(p.avgR),
+        n(p.cleansheets, capCS),
+        nPass(p.passPct),
+        n(p.passesmade, maxOf('passesmade')),
+        n(p.apps, capApps)
+      ]
+    };
   }
-  if(pos==='defender'){
-    return{labels:['Intercetti','Contrasti%','Clean Sh.','Pass%','Rating','Dribbling'],values:[norm(p.avgInt,6)*100/100*100,p.tacklePct??0,norm(p.cleansheets,8)*100/100*100,p.passPct??0,norm(p.avgR,10)*10,norm(p.avgDrib,15)*100/100*100]};
+  if(p.pos==='defender'){
+    return{
+      labels:['Intercetti/g','Contrasti%','Clean Sheet','Pass%','Rating','Dribbling/g'],
+      values:[
+        n(p.avgInt, capInt),
+        n(p.tacklePct??0, 100),
+        n(p.cleansheets, capCS),
+        nPass(p.passPct),
+        nRating(p.avgR),
+        n(p.avgDrib, capDrib)
+      ]
+    };
   }
-  if(pos==='midfielder'){
-    return{labels:['G+A/90m','Pass%','Dribbling','Intercetti','Rating','Tiri'],values:[norm(p.ga90,2)*50,p.passPct??0,norm(p.avgDrib,20)*100/100*100,norm(p.avgInt,5)*100/100*100,norm(p.avgR,10)*10,norm(p.avgShots,5)*100/100*100]};
+  if(p.pos==='midfielder'){
+    return{
+      labels:['G+A/90m','Pass%','Dribbling/g','Intercetti/g','Rating','Tiri/g'],
+      values:[
+        n(p.ga90, capGA90),
+        nPass(p.passPct),
+        n(p.avgDrib, capDrib),
+        n(p.avgInt, capInt),
+        nRating(p.avgR),
+        n(p.avgShots, capShots)
+      ]
+    };
   }
-  // forward
-  return{labels:['Gol/90m','G+A','Tiri/gara','Dribbling','Rating','Pass%'],values:[norm(p.goals90,1.5)*100/100*100,norm(p.ga,20)*100/100*100,norm(p.avgShots,6)*100/100*100,norm(p.avgDrib,20)*100/100*100,norm(p.avgR,10)*10,p.passPct??0]};
+  // forward / default
+  return{
+    labels:['Gol/90m','G+A tot','Tiri/g','Dribbling/g','Rating','Pass%'],
+    values:[
+      n(p.goals90, capGoals90),
+      n(p.ga, capGA),
+      n(p.avgShots, capShots),
+      n(p.avgDrib, capDrib),
+      nRating(p.avgR),
+      nPass(p.passPct)
+    ]
+  };
 }
 window.openPlayer=openPlayer;
 
