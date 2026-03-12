@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FC Cannatello · Match Analyst</title>
+
+<!-- PWA / iOS App -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cannatello">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="logo.jpg">
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -12,7 +21,8 @@
 body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-height:100vh;overflow-x:hidden;background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(0,245,122,.06) 0%,transparent 60%)}
 .topbar{position:sticky;top:0;z-index:100;background:#0d0d0d;backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,245,122,.15);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.brand-icon{width:32px;height:32px;background:var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(0,245,122,.4)}
+.brand-icon{width:36px;height:36px;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.brand-icon img{width:100%;height:100%;object-fit:cover}
 .brand-name{font-family:'Barlow Condensed';font-size:18px;font-weight:900;color:#00f57a;letter-spacing:2px;white-space:nowrap;text-shadow:0 0 20px rgba(0,245,122,.35)}
 .brand-tag{font-size:9px;color:#6a7f8f;letter-spacing:1px;white-space:nowrap}
 .nav{display:flex;gap:2px;overflow-x:auto}.nav::-webkit-scrollbar{display:none}
@@ -129,7 +139,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
 <body>
 <div class="topbar">
   <div class="brand">
-    <div class="brand-icon">⚽</div>
+    <div class="brand-icon"><img src="logo.jpg" alt="FC Cannatello"></div>
     <div><div class="brand-name">FC Cannatello</div><div class="brand-tag">MATCH ANALYST · FC26 PRO CLUBS</div></div>
   </div>
   <div class="nav">
