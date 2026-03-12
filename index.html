@@ -309,6 +309,8 @@ function parseMat(raw){
 }
 
 /* ═══════════ BUILD STATS ═══════════ */
+const DCO_THRESHOLD=4.0; // voti ≤ soglia = disconnessione, esclusi dal rating
+
 function buildStats(matches){
   const a={};
   matches.forEach(m=>{
@@ -316,23 +318,29 @@ function buildStats(matches){
       if(!a[p.name])a[p.name]={name:p.name,pos:p.pos,apps:0,goals:0,assists:0,ga:0,
         shots:0,saves:0,dribbles:0,interceptions:0,redcards:0,
         passesmade:0,passattempts:0,tacklesmade:0,tackleattempts:0,
-        secondAssists:0,cleansheets:0,motm:0,rSum:0,minsPlayed:0,wins:0,
-        ratings:[],hist:[],matchRatings:[]};
+        secondAssists:0,cleansheets:0,motm:0,rSum:0,rCount:0,minsPlayed:0,wins:0,
+        dcoCount:0,ratings:[],hist:[],matchRatings:[]};
       const x=a[p.name];
+      const isDco=p.rating<=DCO_THRESHOLD; // disconnessione
       x.apps++;x.goals+=p.goals;x.assists+=p.assists;x.ga+=p.ga;
       x.shots+=p.shots;x.saves+=p.saves;x.dribbles+=p.dribbles;
       x.interceptions+=p.interceptions;x.redcards+=p.redcards;
       x.passesmade+=p.passesmade;x.passattempts+=p.passattempts;
       x.tacklesmade+=p.tacklesmade;x.tackleattempts+=p.tackleattempts;
       x.secondAssists+=p.secondAssists;x.cleansheets+=p.cleansheet;
-      if(p.motm)x.motm++;x.rSum+=p.rating;x.minsPlayed+=p.mins;
+      if(p.motm)x.motm++;x.minsPlayed+=p.mins;
       if(m.res==='W')x.wins++;
-      x.ratings.push(p.rating);
-      x.hist.push({date:m.date,opp:m.opp,res:m.res,rating:p.rating,goals:p.goals,assists:p.assists,motm:p.motm,score:m.score});
+      if(isDco){
+        x.dcoCount++; // conta le disconnessioni ma NON include il voto
+      } else {
+        x.rSum+=p.rating;x.rCount++;
+        x.ratings.push(p.rating);
+      }
+      x.hist.push({date:m.date,opp:m.opp,res:m.res,rating:p.rating,goals:p.goals,assists:p.assists,motm:p.motm,score:m.score,dco:isDco});
     });
   });
   Object.values(a).forEach(x=>{
-    x.avgR=x.apps?x.rSum/x.apps:0;
+    x.avgR=x.rCount?x.rSum/x.rCount:0;
     x.passPct=x.passattempts>0?Math.round(x.passesmade/x.passattempts*100):null;
     x.tacklePct=x.tackleattempts>0?Math.round(x.tacklesmade/x.tackleattempts*100):null;
     x.avgDrib=x.apps?x.dribbles/x.apps:0;
@@ -342,7 +350,8 @@ function buildStats(matches){
     x.goals90=x.minsPlayed>0?(x.goals/x.minsPlayed*90):0;
     x.winPct=x.apps?Math.round(x.wins/x.apps*100):0;
     x.cons=x.ratings.length>1?stdDev(x.ratings):0;
-    x.recentAvg=x.hist.slice(0,5).reduce((s,h)=>s+h.rating,0)/Math.min(5,x.hist.length);
+    const recentValid=x.hist.filter(h=>!h.dco).slice(0,5);
+    x.recentAvg=recentValid.length?recentValid.reduce((s,h)=>s+h.rating,0)/recentValid.length:x.avgR;
     x.trend=x.recentAvg-x.avgR;
     // tier
     x.tier=x.avgR>=8.5?'S':x.avgR>=7.5?'A':x.avgR>=6.5?'B':x.avgR>=5.5?'C':'D';
@@ -363,7 +372,7 @@ function renderKPIs(){
   const n=AM.length||1;
   const gf=AM.reduce((s,m)=>s+m.gf,0),ga=AM.reduce((s,m)=>s+m.ga,0);
   const pl=AM.filter(m=>m.type==='playoffMatch'),plW=pl.filter(m=>m.res==='W').length;
-  const avgR=(AM.reduce((s,m)=>s+m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1),0)/n).toFixed(2);
+  const avgR=(AM.reduce((s,m)=>{const vp=m.ps.filter(p=>p.rating>DCO_THRESHOLD);return s+(vp.reduce((ss,p)=>ss+p.rating,0)/(vp.length||1));},0)/n).toFixed(2);
   const cs=AM.filter(m=>m.ga===0).length;
   const avgShots=(AM.reduce((s,m)=>s+m.shots,0)/n).toFixed(1);
   const sc=calcStreak();
@@ -407,7 +416,7 @@ function renderCharts(){
   // Rating medio — oro
   dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',
     data:{labels:labs,datasets:[{label:'Rating',
-      data:s.map(m=>+(m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1)).toFixed(2)),
+      data:s.map(m=>{const vp=m.ps.filter(p=>p.rating>DCO_THRESHOLD);return+(vp.reduce((ss,p)=>ss+p.rating,0)/(vp.length||1)).toFixed(2)}),
       borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#f5c518'
     }]},
     options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,min:4,max:10}}}
@@ -573,7 +582,7 @@ function renderReport(){
     +'ottenendo <strong style="color:#f5c518">'+W+' vittorie</strong> (win rate <strong style="color:#e8f0f5">'+Math.round(W/n*100)+'%</strong>). '
     +'Il team ha segnato una media di <strong style="color:#e8f0f5">'+(AM.reduce((s,m)=>s+m.gf,0)/n).toFixed(1)+' gol a partita</strong> '
     +'subendone <strong style="color:#e8f0f5">'+(AM.reduce((s,m)=>s+m.ga,0)/n).toFixed(1)+'</strong>. '
-    +'Il rating medio di squadra si attesta su <strong style="color:#f5c518">'+(AM.reduce((s,m)=>s+m.ps.reduce((ss,p)=>ss+p.rating,0)/(m.ps.length||1),0)/n).toFixed(2)+'</strong>. '
+    +'Il rating medio di squadra si attesta su <strong style="color:#f5c518">'+(AM.reduce((s,m)=>{const vp=m.ps.filter(p=>p.rating>DCO_THRESHOLD);return s+(vp.reduce((ss,p)=>ss+p.rating,0)/(vp.length||1));},0)/n).toFixed(2)+'</strong>. '
     +'<strong style="color:#f5c518">'+best?.name+'</strong> si conferma il giocatore più continuo con un rating di <strong>'+best?.avgR.toFixed(2)+'</strong>, '
     +'mentre <strong style="color:#f5c518">'+scorer?.name+'</strong> guida la classifica marcatori con <strong>'+scorer?.goals+' reti</strong>. '
     +'La fase difensiva ha tenuto a zero in <strong style="color:#f5c518">'+AM.filter(m=>m.ga===0).length+' occasioni</strong> su '+AM.length+'.'
@@ -669,15 +678,19 @@ function openMatch(id){
     +'<div style="font-size:10px;color:#f5c518;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">🎖️ Pagelle</div>'
     +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">'
     +sorted.map(p=>{
-      const isTop=p.rating>=7.5,isFlop=p.rating<6.5;
-      const bg=isTop?'rgba(245,197,24,.06)':isFlop?'rgba(245,54,92,.06)':'rgba(255,255,255,.03)';
-      const border=isTop?'rgba(245,197,24,.25)':isFlop?'rgba(245,54,92,.25)':'var(--border)';
-      const badge=isTop?'<span style="font-size:9px;background:rgba(245,197,24,.15);color:#f5c518;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">PROMOSSO</span>':isFlop?'<span style="font-size:9px;background:rgba(245,54,92,.15);color:#e02020;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">BOCCIATO</span>':'';
-      const rc2=p.rating>=8.5?'#f5c518':p.rating>=7?'#f5c518':p.rating>=6.5?'#f59e0b':'#e02020';
-      const note=buildPlayerMatchNote(p,m);
-      return '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:12px 14px">'
+      const isDco=p.rating<=DCO_THRESHOLD;
+      const isTop=p.rating>=7.5&&!isDco,isFlop=p.rating<6.5&&!isDco;
+      const bg=isDco?'rgba(255,255,255,.02)':isTop?'rgba(245,197,24,.06)':isFlop?'rgba(245,54,92,.06)':'rgba(255,255,255,.03)';
+      const border=isDco?'rgba(255,255,255,.06)':isTop?'rgba(245,197,24,.25)':isFlop?'rgba(245,54,92,.25)':'var(--border)';
+      const badge=isDco
+        ?'<span style="font-size:9px;background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">⚡ DCO</span>'
+        :isTop?'<span style="font-size:9px;background:rgba(245,197,24,.15);color:#f5c518;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">PROMOSSO</span>'
+        :isFlop?'<span style="font-size:9px;background:rgba(245,54,92,.15);color:#e02020;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">BOCCIATO</span>':'';
+      const rc2=isDco?'#f59e0b':p.rating>=8.5?'#f5c518':p.rating>=7?'#f5c518':p.rating>=6.5?'#f59e0b':'#e02020';
+      const note=isDco?'<em style="color:#8a9ab0">Voto non conteggiato nelle statistiche — disconnessione rilevata ('+p.rating.toFixed(1)+')</em>':buildPlayerMatchNote(p,m);
+      return '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:12px 14px'+(isDco?';opacity:.7':'')+'">'
         +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
-        +'<div style="font-family:\'Barlow Condensed\';font-size:28px;font-weight:900;color:'+rc2+';width:44px;flex-shrink:0">'+p.rating.toFixed(1)+'</div>'
+        +'<div style="font-family:\'Barlow Condensed\';font-size:28px;font-weight:900;color:'+rc2+';width:44px;flex-shrink:0">'+(isDco?'—':p.rating.toFixed(1))+'</div>'
         +'<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#e8f0f5">'+p.name+(p.motm?' ⭐':'')+badge+'</div>'
         +'<div style="font-size:10px;color:var(--mid)">'+( PLFULL[p.pos]||p.pos||'—')+' · '+p.goals+'G '+p.assists+'A · '+p.shots+' tiri · '+p.dribbles+' drib · '+p.interceptions+' int'+(p.passPct!==null?' · pass '+p.passPct+'%':'')+'</div>'
         +'</div></div>'
@@ -831,8 +844,10 @@ function openPlayer(name){
   document.getElementById('pbody').innerHTML=
     // HERO ROW
     '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:18px">'
-    +[{v:p.avgR.toFixed(2),l:'Rating avg',c:rc},{v:p.goals,l:'Gol'},{v:p.assists,l:'Assist'},{v:p.ga,l:'G+A'},{v:p.motm,l:'MOM'},{v:p.cleansheets,l:'Clean Sh.'},{v:p.apps,l:'Presenze'}]
+    +[{v:p.avgR.toFixed(2),l:'Rating avg*',c:rc},{v:p.goals,l:'Gol'},{v:p.assists,l:'Assist'},{v:p.ga,l:'G+A'},{v:p.motm,l:'MOM'},{v:p.cleansheets,l:'Clean Sh.'},{v:p.apps,l:'Presenze'}]
     .map(s=>'<div class="ministat"><div class="msv '+(s.c||'')+'">'+s.v+'</div><div class="msl">'+s.l+'</div></div>').join('')
+    +'</div>'
+    +(p.dcoCount?'<div style="font-size:11px;color:#8a9ab0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:6px 10px;margin-bottom:12px">⚡ *Rating calcolato su <strong style="color:#f0f0f0">'+p.rCount+' partite</strong> — escluse <strong style="color:#f59e0b">'+p.dcoCount+' disconnessioni</strong> (voto ≤4.0 non conteggiato)</div>':'')
     +'</div>'
     // TIER + TREND
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
