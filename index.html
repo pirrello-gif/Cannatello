@@ -482,7 +482,7 @@ function renderCharts(){
   const leg={labels:{color:'#c0ccd8',font:{size:10},boxWidth:10,padding:16}};
 
   // Gol segnati (verde) vs subiti (rosso) — ben distinguibili
-  dc('cGoals');CHARTS.g=new Chart(document.getElementById('cGoals'),{type:'bar',
+  dc('cGoals');CHARTS['cGoals']=new Chart(document.getElementById('cGoals'),{type:'bar',
     data:{labels:labs,datasets:[
       {label:'Segnati',data:s.map(m=>m.gf),backgroundColor:'#22c55e',borderRadius:3},
       {label:'Subiti', data:s.map(m=>m.ga),backgroundColor:'#e02020',borderRadius:3}
@@ -491,7 +491,7 @@ function renderCharts(){
   });
 
   // Rating medio — oro
-  dc('cRating');CHARTS.r=new Chart(document.getElementById('cRating'),{type:'line',
+  dc('cRating');CHARTS['cRating']=new Chart(document.getElementById('cRating'),{type:'line',
     data:{labels:labs,datasets:[{label:'Rating',
       data:s.map(m=>{const vp=m.ps.filter(p=>p.rating>DCO_THRESHOLD);return+(vp.reduce((ss,p)=>ss+p.rating,0)/(vp.length||1)).toFixed(2)}),
       borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.1)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#f5c518'
@@ -501,7 +501,7 @@ function renderCharts(){
 
   // Top G+A — verde gol, gold assist
   const t8=Object.values(MS).sort((a,b)=>b.ga-a.ga).slice(0,8);
-  dc('cGA');CHARTS.ga=new Chart(document.getElementById('cGA'),{type:'bar',
+  dc('cGA');CHARTS['cGA']=new Chart(document.getElementById('cGA'),{type:'bar',
     data:{labels:t8.map(p=>p.name),datasets:[
       {label:'Gol',   data:t8.map(p=>p.goals),  backgroundColor:'#22c55e',borderRadius:3},
       {label:'Assist',data:t8.map(p=>p.assists),backgroundColor:'#f5c518',borderRadius:3}
@@ -510,7 +510,7 @@ function renderCharts(){
   });
 
   // Shot conversion — azzurro
-  dc('cShot');CHARTS.sh=new Chart(document.getElementById('cShot'),{type:'line',
+  dc('cShot');CHARTS['cShot']=new Chart(document.getElementById('cShot'),{type:'line',
     data:{labels:labs,datasets:[{label:'Conv%',
       data:s.map(m=>m.shotConv),
       borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#60a5fa'
@@ -520,7 +520,7 @@ function renderCharts(){
 
   // Distribuzione risultati — verde/giallo/rosso
   const W=AM.filter(m=>m.res==='W').length,L=AM.filter(m=>m.res==='L').length,D2=AM.filter(m=>m.res==='D').length;
-  dc('cPie');CHARTS.pie=new Chart(document.getElementById('cPie'),{type:'doughnut',
+  dc('cPie');CHARTS['cPie']=new Chart(document.getElementById('cPie'),{type:'doughnut',
     data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{
       data:[W,D2,L],
       backgroundColor:['#22c55e','#f5c518','#e02020'],
@@ -531,7 +531,7 @@ function renderCharts(){
 
   // Tiri/gara — viola
   const ts8=Object.values(MS).filter(p=>p.apps>=3).sort((a,b)=>b.avgShots-a.avgShots).slice(0,8);
-  dc('cShots');CHARTS.shots=new Chart(document.getElementById('cShots'),{type:'bar',
+  dc('cShots');CHARTS['cShots']=new Chart(document.getElementById('cShots'),{type:'bar',
     data:{labels:ts8.map(p=>p.name),datasets:[{label:'Tiri/gara',
       data:ts8.map(p=>+p.avgShots.toFixed(1)),backgroundColor:'#a855f7',borderRadius:3
     }]},
@@ -1129,7 +1129,8 @@ function openPlayer(name){
 
   // RADAR CHART
   const radarData=buildRadar(p);
-  new Chart(document.getElementById('pradar'),{
+  dc('pradar');
+  CHARTS['pradar']=new Chart(document.getElementById('pradar'),{
     type:'radar',
     data:{labels:radarData.labels,datasets:[{
       data:radarData.values,
