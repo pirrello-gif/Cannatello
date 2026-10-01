@@ -245,9 +245,10 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
 </div>
 
 <script>
-const CLUB='2025457';
-const API='https://api.ourproclub.app/api/match/history?clubId=552863';
-const ROSTER=new Set(['Pipaers','piertamb','FanelsLeclerc98','Matei5996','SAGAT92100','drummer7i','Rob_ut09','rururu92','ekasemu','CapraGirgentana','RedEagle1912','akragas_estrema']);
+const API='https://proclubs.ea.com/api/fc/clubs/matches?matchType=leagueMatch&platform=common-gen5&clubIds=552863';
+const API_PO='https://proclubs.ea.com/api/fc/clubs/matches?matchType=playoffMatch&platform=common-gen5&clubIds=552863';
+const CLUB='552863';
+const ROSTER=new Set(['Pipaers','piertamb','FanelsLeclerc98','Matei5996','SAGAT92100','drummer7i','Rob_ut09','rururu92','ekasemu','CapraGirgentana','RedEagle1912','akragas_estrema','Blac150']);
 const PLBL={forward:'ATT',midfielder:'CEN',defender:'DIF',goalkeeper:'POR'};
 const PLFULL={forward:'Attaccante',midfielder:'Centrocampista',defender:'Difensore',goalkeeper:'Portiere'};
 let AM=[],MS={},CHARTS={},MF='all',PF='all';
@@ -255,14 +256,15 @@ let AM=[],MS={},CHARTS={},MF='all',PF='all';
 window.addEventListener('load',init);
 async function init(){
   try{
-    const r=await fetch(API);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    AM=parseMat(await r.json());
+    const [rL,rP]=await Promise.all([fetch(API),fetch(API_PO)]);
+    const rawL=rL.ok?(await rL.json()).map(m=>({...m,_isPlayoff:false})):[];
+    const rawP=rP.ok?(await rP.json()).map(m=>({...m,_isPlayoff:true})):[];
+    AM=parseMat([...rawL,...rawP]);
     MS=buildStats(AM);
     document.getElementById('loader').style.display='none';
     document.getElementById('slbl').textContent=AM.length+' partite';
     show('dash'); renderAll();
-    document.getElementById('upd').textContent='Live · '+new Date().toLocaleString('it-IT')+' · ourproclub.app';
+    document.getElementById('upd').textContent='Live · '+new Date().toLocaleString('it-IT')+' · EA API';
   }catch(e){
     document.getElementById('loader').style.display='none';
     const b=document.getElementById('ebox');
@@ -272,20 +274,25 @@ async function init(){
   }
 }
 
-/* ═══════════ PARSE ═══════════ */
+/* ═══════════ PARSE — EA API FORMAT ═══════════ */
 function parseMat(raw){
+  const seen=new Set();
   return raw.map(m=>{
-    const clubs=m.match_data?.clubs||{};
+    // EA format: m.clubs, m.players
+    const clubs=m.clubs||{};
     const my=clubs[CLUB]||{};
     const oid=Object.keys(clubs).find(id=>id!==CLUB);
     const opp=oid?clubs[oid]:{};
-    const gf=parseInt(my.goals||0),ga=parseInt(opp.goals||0);
+    const gf=parseInt(my.goals||0),ga=parseInt(my.goalsAgainst||0);
     const dW=my.winnerByDnf==='1',dL=opp.winnerByDnf==='1';
     const res=dW?'W':dL?'L':gf>ga?'W':gf<ga?'L':'D';
-    const ps=Object.entries(m.player_data||{}).map(([n,p])=>{
+    // players: m.players[CLUB][playerId] with playername inside
+    const myPlayers=m.players?.[CLUB]||{};
+    const ps=Object.values(myPlayers).map(p=>{
+      const name=p.playername||'';
       const pm=parseInt(p.passesmade||0),pa=parseInt(p.passattempts||0);
       const tm=parseInt(p.tacklesmade||0),ta=parseInt(p.tackleattempts||0);
-      return{name:n,pos:p.pos||'',
+      return{name,pos:p.pos||'',
         rating:parseFloat(p.rating||0),goals:parseInt(p.goals||0),assists:parseInt(p.assists||0),
         ga:parseInt(p.goals||0)+parseInt(p.assists||0),
         shots:parseInt(p.shots||0),saves:parseInt(p.saves||0),
@@ -298,14 +305,20 @@ function parseMat(raw){
         cleansheet:parseInt(p.cleansheetsdef||0)+parseInt(p.cleansheetsgk||0),
         motm:p.mom==='1',mins:Math.round(parseInt(p.secondsPlayed||0)/60)};
     }).filter(p=>ROSTER.has(p.name)).sort((a,b)=>b.rating-a.rating);
-    const ts=parseInt(m.match_date||0);
+    const ts=parseInt(m.timestamp||0);
+    const matchId=String(m.matchId||m.id||ts);
+    if(seen.has(matchId))return null; seen.add(matchId);
     const tshots=ps.reduce((s,p)=>s+p.shots,0);
-    return{id:String(m.id),ts,
+    // match_type: EA uses matchType field inside clubs obj or top-level
+    const isPlayoff=m._isPlayoff===true;
+    const oppName=opp.details?.name||'Club '+oid;
+    return{id:matchId,ts,
       date:ts?new Date(ts*1000).toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}):'?',
-      type:m.match_type,tlabel:m.match_type==='playoffMatch'?'🏆 Playoff':'🏅 Camp.',
-      opp:opp.clubName||'Club '+oid,score:gf+'-'+ga,gf,ga,res,dnf:dW||dL,
+      type:isPlayoff?'playoffMatch':'leagueMatch',
+      tlabel:isPlayoff?'🏆 Playoff':'🏅 Camp.',
+      opp:oppName,score:gf+'-'+ga,gf,ga,res,dnf:dW||dL,
       shots:tshots,shotConv:tshots>0?Math.round(gf/tshots*100):0,ps};
-  }).sort((a,b)=>b.ts-a.ts);
+  }).filter(Boolean).sort((a,b)=>b.ts-a.ts);
 }
 
 /* ═══════════ BUILD STATS ═══════════ */
