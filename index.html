@@ -280,6 +280,10 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
           style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-family:'Barlow Condensed';font-size:18px;font-weight:900;cursor:pointer;width:100%;letter-spacing:1px">
           IMPORTA E AGGIORNA
         </button>
+        <button onclick="syncAll()"
+          style="background:#1a3a5c;color:#60a5fa;border:1px solid #60a5fa;border-radius:8px;padding:10px 24px;font-family:'Barlow Condensed';font-size:16px;font-weight:700;cursor:pointer;width:100%;letter-spacing:1px;margin-top:8px">
+          ☁️ SINCRONIZZA TUTTO SU SUPABASE
+        </button>
         <div id="importMsg" style="margin-top:10px;font-size:13px;display:none"></div>
       </div>
     </div>
@@ -808,6 +812,21 @@ window.openMatch=openMatch;
 /* ═══════════ ADMIN PANEL ═══════════ */
 const ADMIN_PWD='cannatello2025';
 let importType='league';
+
+async function syncAll(){
+  const msg=document.getElementById('importMsg');
+  if(AM.length===0){
+    msg.style.display='block';msg.style.color='#f5365c';
+    msg.textContent='⚠️ Nessuna partita in memoria da sincronizzare.';return;
+  }
+  msg.style.display='block';msg.style.color='#f59e0b';
+  msg.textContent='⏳ Sincronizzazione di '+AM.length+' partite su Supabase...';
+  const saved=await saveToSupabase(AM);
+  msg.style.color=saved?'#22c55e':'#f5365c';
+  msg.textContent=saved
+    ?'✅ '+AM.length+' partite sincronizzate su Supabase.'
+    :'❌ Errore durante la sincronizzazione. Controlla la console.';
+}
 
 function showAdmin(){
   document.getElementById('adminOverlay').classList.add('open');
