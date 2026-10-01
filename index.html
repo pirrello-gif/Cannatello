@@ -149,6 +149,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
     <button class="nb" onclick="show('squad')">Giocatori</button>
     <button class="nb" onclick="show('stats')">Classifiche</button>
     <button class="nb" onclick="show('report')">Report</button>
+    <button class="nb" onclick="showAdmin()" style="color:#f59e0b">⚙️ Admin</button>
   </div>
   <div class="sbadge"><div class="dot" id="dot"></div><span id="slbl">—</span></div>
 </div>
@@ -234,6 +235,56 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
   <div id="reportContent"></div>
 </div>
 
+<!-- ADMIN PANEL -->
+<div class="overlay" id="adminOverlay" onclick="closeAdmin(event)">
+  <div class="modal" style="max-width:640px" onclick="event.stopPropagation()">
+    <div class="mh"><h2 style="color:#f59e0b">⚙️ Admin — Importa partite</h2><button class="mcbtn" onclick="closeAdmin()">✕</button></div>
+    <div class="mb" id="adminBody">
+      <!-- LOGIN -->
+      <div id="adminLogin">
+        <div style="font-size:13px;color:#c8d6e0;margin-bottom:14px;line-height:1.7">
+          Incolla qui il JSON dell'API EA dopo ogni sessione di gioco.<br>
+          <span style="color:#8a9ab0;font-size:11px">URL: proclubs.ea.com/api/fc/clubs/matches?matchType=leagueMatch&platform=common-gen5&clubIds=552863</span>
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;color:#8a9ab0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Password</label>
+          <input id="adminPwd" type="password" placeholder="••••••••"
+            style="width:100%;background:#1a1010;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;color:#f0f0f0;font-size:14px;outline:none"
+            onkeydown="if(event.key==='Enter')checkPwd()">
+        </div>
+        <button onclick="checkPwd()"
+          style="background:#cc1a1a;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-family:'Barlow Condensed';font-size:16px;font-weight:700;cursor:pointer;width:100%">
+          Accedi
+        </button>
+        <div id="pwdErr" style="color:#f5365c;font-size:12px;margin-top:8px;display:none">Password errata</div>
+      </div>
+      <!-- IMPORT FORM -->
+      <div id="adminForm" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <button onclick="setImportType('league')" id="btnLeague"
+            style="background:#cc1a1a;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">
+            🏅 Campionato
+          </button>
+          <button onclick="setImportType('playoff')" id="btnPlayoff"
+            style="background:#1a1010;border:1px solid rgba(255,255,255,.15);color:#8a9ab0;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">
+            🏆 Playoff
+          </button>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:#8a9ab0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Incolla JSON EA</label>
+          <textarea id="adminJson" rows="10" placeholder='[{"matchId":"..."}]'
+            style="width:100%;background:#1a1010;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;color:#f0f0f0;font-size:11px;font-family:monospace;outline:none;resize:vertical"></textarea>
+        </div>
+        <button onclick="importJson()"
+          style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-family:'Barlow Condensed';font-size:18px;font-weight:900;cursor:pointer;width:100%;letter-spacing:1px">
+          IMPORTA E AGGIORNA
+        </button>
+        <div id="importMsg" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL MATCH -->
 <div class="overlay" id="movl" onclick="closeM('match',event)">
   <div class="modal"><div class="mh"><h2 id="mtit">—</h2><button class="mcbtn" onclick="closeM('match')">✕</button></div><div class="mb" id="mbody"></div></div>
@@ -255,20 +306,18 @@ let AM=[],MS={},CHARTS={},MF='all',PF='all';
 
 window.addEventListener('load',init);
 async function init(){
-  try{
-    const [rL,rP]=await Promise.all([fetch(API),fetch(API_PO)]);
-    const rawL=rL.ok?(await rL.json()).map(m=>({...m,_isPlayoff:false})):[];
-    const rawP=rP.ok?(await rP.json()).map(m=>({...m,_isPlayoff:true})):[];
-    AM=parseMat([...rawL,...rawP]);
-    MS=buildStats(AM);
+  // Prima carica dati locali se disponibili (risposta immediata)
+  const hasLocal=loadLocalData();
+  if(hasLocal){
     document.getElementById('loader').style.display='none';
     document.getElementById('slbl').textContent=AM.length+' partite';
     show('dash'); renderAll();
-    document.getElementById('upd').textContent='Live · '+new Date().toLocaleString('it-IT')+' · EA API';
-  }catch(e){
+    document.getElementById('upd').textContent='Dati locali · '+new Date().toLocaleString('it-IT')+' · usa Admin per aggiornare';
+    document.getElementById('dot').style.background='#f59e0b';
+  }else{
     document.getElementById('loader').style.display='none';
     const b=document.getElementById('ebox');
-    b.innerHTML='<strong>⚠️ API non raggiungibile</strong><br>'+e.message;
+    b.innerHTML='<strong>⚠️ Nessun dato disponibile</strong><br>Usa il pannello <strong>⚙️ Admin</strong> per importare le partite dal JSON EA.';
     b.classList.add('show'); show('dash');
     document.getElementById('dot').style.background='#e02020';
   }
@@ -740,6 +789,108 @@ function ms2(v,l,sub,col){
   return '<div class="ministat" style="'+(col?'border-color:'+col+'22':'')+'"><div class="msv" style="'+(col?'color:'+col:'')+'">'+v+'</div><div class="msl">'+l+'</div>'+(sub?'<div style="font-size:9px;color:var(--mid)">'+sub+'</div>':'')+'</div>';
 }
 window.openMatch=openMatch;
+
+/* ═══════════ ADMIN PANEL ═══════════ */
+const ADMIN_PWD='cannatello2025';
+let importType='league';
+
+function showAdmin(){
+  document.getElementById('adminOverlay').classList.add('open');
+  document.getElementById('adminLogin').style.display='block';
+  document.getElementById('adminForm').style.display='none';
+  document.getElementById('adminPwd').value='';
+  document.getElementById('pwdErr').style.display='none';
+  setTimeout(()=>document.getElementById('adminPwd').focus(),100);
+}
+
+function closeAdmin(e){
+  if(e&&e.target!==document.getElementById('adminOverlay'))return;
+  document.getElementById('adminOverlay').classList.remove('open');
+}
+
+function checkPwd(){
+  const pwd=document.getElementById('adminPwd').value;
+  if(pwd===ADMIN_PWD){
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminForm').style.display='block';
+  } else {
+    document.getElementById('pwdErr').style.display='block';
+    document.getElementById('adminPwd').value='';
+    document.getElementById('adminPwd').focus();
+  }
+}
+
+function setImportType(t){
+  importType=t;
+  document.getElementById('btnLeague').style.background=t==='league'?'#cc1a1a':'#1a1010';
+  document.getElementById('btnLeague').style.color=t==='league'?'#fff':'#8a9ab0';
+  document.getElementById('btnLeague').style.border=t==='league'?'none':'1px solid rgba(255,255,255,.15)';
+  document.getElementById('btnPlayoff').style.background=t==='playoff'?'#cc1a1a':'#1a1010';
+  document.getElementById('btnPlayoff').style.color=t==='playoff'?'#fff':'#8a9ab0';
+  document.getElementById('btnPlayoff').style.border=t==='playoff'?'none':'1px solid rgba(255,255,255,.15)';
+}
+
+function importJson(){
+  const msg=document.getElementById('importMsg');
+  const raw=document.getElementById('adminJson').value.trim();
+  if(!raw){
+    msg.style.display='block';msg.style.color='#f5365c';
+    msg.textContent='⚠️ Incolla il JSON prima di procedere.';return;
+  }
+  let data;
+  try{data=JSON.parse(raw);}
+  catch(e){
+    msg.style.display='block';msg.style.color='#f5365c';
+    msg.textContent='⚠️ JSON non valido: '+e.message;return;
+  }
+  if(!Array.isArray(data)){data=[data];}
+
+  // Tag con tipo partita e merge con dati esistenti
+  const isPlayoff=importType==='playoff';
+  const tagged=data.map(m=>({...m,_isPlayoff:isPlayoff}));
+
+  // Parsing delle nuove partite
+  const newMatches=parseMat(tagged);
+  if(newMatches.length===0){
+    msg.style.display='block';msg.style.color='#f59e0b';
+    msg.textContent='⚠️ Nessuna partita trovata per il roster attuale nel JSON.';return;
+  }
+
+  // Merge — evita duplicati per matchId
+  const existingIds=new Set(AM.map(m=>m.id));
+  const toAdd=newMatches.filter(m=>!existingIds.has(m.id));
+
+  AM=[...AM,...toAdd].sort((a,b)=>b.ts-a.ts);
+  MS=buildStats(AM);
+
+  // Salva in localStorage per persistenza
+  try{
+    localStorage.setItem('cannatello_matches', JSON.stringify(
+      AM.map(m=>({...m,_raw:undefined}))
+    ));
+  }catch(e){}
+
+  renderAll();
+  document.getElementById('adminJson').value='';
+  msg.style.display='block';msg.style.color='#22c55e';
+  msg.textContent='✅ Importate '+toAdd.length+' nuove partite ('+newMatches.length-toAdd.length+' già presenti). Totale: '+AM.length+' partite.';
+}
+
+/* Carica dati da localStorage se API non disponibile */
+function loadLocalData(){
+  try{
+    const saved=localStorage.getItem('cannatello_matches');
+    if(saved){
+      const parsed=JSON.parse(saved);
+      if(parsed&&parsed.length>0){
+        AM=parsed;
+        MS=buildStats(AM);
+        return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
 
 /* ═══════════ ANALISI MATCH ═══════════ */
 function analyzeMatch(m,avgR){
