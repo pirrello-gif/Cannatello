@@ -882,13 +882,13 @@ function loadLocalData(){
     const saved=localStorage.getItem('cannatello_matches');
     if(saved){
       const parsed=JSON.parse(saved);
-      if(parsed&&parsed.length>0){
+      if(Array.isArray(parsed)&&parsed.length>0){
         AM=parsed;
         MS=buildStats(AM);
         return true;
       }
     }
-  }catch(e){}
+  }catch(e){console.warn('localStorage error:',e);}
   return false;
 }
 
