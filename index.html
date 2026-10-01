@@ -244,7 +244,8 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
       <div id="adminLogin">
         <div style="font-size:13px;color:#c8d6e0;margin-bottom:14px;line-height:1.7">
           Incolla qui il JSON dell'API EA dopo ogni sessione di gioco.<br>
-          <span style="color:#8a9ab0;font-size:11px">URL: proclubs.ea.com/api/fc/clubs/matches?matchType=leagueMatch&platform=common-gen5&clubIds=552863</span>
+          <span style="color:#8a9ab0;font-size:11px">🏅 Campionato: proclubs.ea.com/api/fc/clubs/matches?matchType=leagueMatch&platform=common-gen5&clubIds=552863&maxResultCount=20<br>
+          🏆 Playoff: proclubs.ea.com/api/fc/clubs/matches?matchType=playoffMatch&platform=common-gen5&clubIds=552863&maxResultCount=20</span>
         </div>
         <div style="margin-bottom:14px">
           <label style="font-size:11px;color:#8a9ab0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Password</label>
@@ -299,6 +300,9 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
 const API='/api/proxy?type=league';
 const API_PO='/api/proxy?type=playoff';
 const CLUB='552863';
+const SUPABASE_URL='https://kfdqqndqsmgtdnlgerdt.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmZHFxbmRxc21ndGRubGdlcmR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NTk4MTAsImV4cCI6MjEwNjQzNTgxMH0.F9oHAY8z6w9E4JnUoNtraYLYnnHQ7QZMzPxcdCMDkIc';
+const SUPABASE_HEADERS={'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY};
 const ROSTER=new Set(['Pipaers','piertamb','FanelsLeclerc98','Matei5996','SAGAT92100','drummer7i','Rob_ut09','rururu92','ekasemu','CapraGirgentana','RedEagle1912','akragas_estrema','Blac150']);
 const PLBL={forward:'ATT',midfielder:'CEN',defender:'DIF',goalkeeper:'POR'};
 const PLFULL={forward:'Attaccante',midfielder:'Centrocampista',defender:'Difensore',goalkeeper:'Portiere'};
@@ -306,13 +310,24 @@ let AM=[],MS={},CHARTS={},MF='all',PF='all';
 
 window.addEventListener('load',init);
 async function init(){
-  // Prima carica dati locali se disponibili (risposta immediata)
+  document.getElementById('loader').style.display='flex';
+  // Prima prova Supabase
+  const fromSupabase=await loadFromSupabase();
+  if(fromSupabase){
+    document.getElementById('loader').style.display='none';
+    document.getElementById('slbl').textContent=AM.length+' partite';
+    show('dash'); renderAll();
+    document.getElementById('upd').textContent='Supabase · '+new Date().toLocaleString('it-IT');
+    document.getElementById('dot').style.background='#22c55e';
+    return;
+  }
+  // Fallback localStorage
   const hasLocal=loadLocalData();
   if(hasLocal){
     document.getElementById('loader').style.display='none';
     document.getElementById('slbl').textContent=AM.length+' partite';
     show('dash'); renderAll();
-    document.getElementById('upd').textContent='Dati locali · '+new Date().toLocaleString('it-IT')+' · usa Admin per aggiornare';
+    document.getElementById('upd').textContent='Cache locale · usa Admin per aggiornare';
     document.getElementById('dot').style.background='#f59e0b';
   }else{
     document.getElementById('loader').style.display='none';
@@ -830,7 +845,7 @@ function setImportType(t){
   document.getElementById('btnPlayoff').style.border=t==='playoff'?'none':'1px solid rgba(255,255,255,.15)';
 }
 
-function importJson(){
+async function importJson(){
   const msg=document.getElementById('importMsg');
   const raw=document.getElementById('adminJson').value.trim();
   if(!raw){
@@ -863,17 +878,24 @@ function importJson(){
   AM=[...AM,...toAdd].sort((a,b)=>b.ts-a.ts);
   MS=buildStats(AM);
 
-  // Salva in localStorage per persistenza
-  try{
-    localStorage.setItem('cannatello_matches', JSON.stringify(
-      AM.map(m=>({...m,_raw:undefined}))
-    ));
-  }catch(e){}
+  // Salva in localStorage
+  try{localStorage.setItem('cannatello_matches',JSON.stringify(AM));}catch(e){}
 
   renderAll();
   document.getElementById('adminJson').value='';
-  msg.style.display='block';msg.style.color='#22c55e';
-  msg.textContent='✅ Importate '+toAdd.length+' nuove partite ('+newMatches.length-toAdd.length+' già presenti). Totale: '+AM.length+' partite.';
+
+  if(toAdd.length>0){
+    msg.style.display='block';msg.style.color='#f59e0b';
+    msg.textContent='⏳ Salvataggio su Supabase...';
+    const saved=await saveToSupabase(toAdd);
+    msg.style.color=saved?'#22c55e':'#f59e0b';
+    msg.textContent=saved
+      ?'✅ Salvate '+toAdd.length+' nuove partite nel cloud. Totale: '+AM.length+' partite.'
+      :'⚠️ Importate '+toAdd.length+' partite (errore cloud — dati solo in locale). Totale: '+AM.length;
+  }else{
+    msg.style.display='block';msg.style.color='#8a9ab0';
+    msg.textContent='ℹ️ Nessuna nuova partita — tutte già presenti. Totale: '+AM.length+' partite.';
+  }
 }
 
 /* Carica dati da localStorage se API non disponibile */
@@ -890,6 +912,41 @@ function loadLocalData(){
     }
   }catch(e){console.warn('localStorage error:',e);}
   return false;
+}
+
+/* ═══════════ SUPABASE ═══════════ */
+async function loadFromSupabase(){
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/matches?select=*&order=ts.desc',{headers:SUPABASE_HEADERS});
+    if(!r.ok)return false;
+    const rows=await r.json();
+    if(!Array.isArray(rows)||rows.length===0)return false;
+    AM=rows.map(row=>({
+      id:row.id,ts:row.ts,date:row.date,type:row.type,tlabel:row.tlabel,
+      opp:row.opp,score:row.score,gf:row.gf,ga:row.ga,res:row.res,
+      dnf:row.dnf,shots:row.shots,shotConv:row.shot_conv,ps:row.ps||[]
+    })).sort((a,b)=>b.ts-a.ts);
+    MS=buildStats(AM);
+    // Aggiorna anche localStorage
+    try{localStorage.setItem('cannatello_matches',JSON.stringify(AM));}catch(e){}
+    return true;
+  }catch(e){console.warn('Supabase load error:',e);return false;}
+}
+
+async function saveToSupabase(matches){
+  const rows=matches.map(m=>({
+    id:m.id,ts:m.ts,date:m.date,type:m.type,tlabel:m.tlabel,
+    opp:m.opp,score:m.score,gf:m.gf,ga:m.ga,res:m.res,
+    dnf:m.dnf,shots:m.shots,shot_conv:m.shotConv,ps:m.ps
+  }));
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/matches',{
+      method:'POST',
+      headers:{...SUPABASE_HEADERS,'Prefer':'resolution=ignore-duplicates'},
+      body:JSON.stringify(rows)
+    });
+    return r.ok;
+  }catch(e){console.warn('Supabase save error:',e);return false;}
 }
 
 /* ═══════════ ANALISI MATCH ═══════════ */
