@@ -216,8 +216,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
     <div><div class="sr"><span class="st">💥 G+A totali</span></div><div class="lb" id="lbGA2"></div></div>
   </div>
   <div class="g2" style="margin-top:16px">
-    <div><div class="sr"><span class="st">🔀 Dribbling/gara</span><span class="ss">min 3 pres.</span></div><div class="lb" id="lbD"></div></div>
-    <div><div class="sr"><span class="st">🛡️ Intercetti/gara</span></div><div class="lb" id="lbI"></div></div>
+
   </div>
   <div class="g2" style="margin-top:16px">
     <div><div class="sr"><span class="st">⚡ Tiri/gara</span></div><div class="lb" id="lbSh"></div></div>
@@ -583,8 +582,7 @@ function applyPF(){
     +'<div class="ps"><span class="psv">'+p.motm+'</span><span class="psl">MOM</span></div>'
     +'</div><div class="pbars">'
     +pb('Pass%',p.passPct,100,'#60a5fa',true)
-    +pb('Drib/gara',p.avgDrib.toFixed(1),20,'#f59e0b',false)
-    +pb('Intercetti',p.avgInt.toFixed(1),6,'#34d399',false)
+    
     +pb('G+A/90m',p.ga90.toFixed(2),2,'#f5c518',false)
     +'</div></div></div>';
   }).join('');
@@ -625,8 +623,7 @@ function renderLeaderboards(){
   lb('lbA',[...ps].sort((a,b)=>b.assists-a.assists).slice(0,8).map(p=>({name:p.name,val:p.assists,sub:p.secondAssists+' pre-assist'})));
   lb('lbR',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgR-a.avgR).slice(0,8).map(p=>({name:p.name,val:p.avgR.toFixed(2),sub:p.apps+' pres · ±'+p.cons.toFixed(2)})));
   lb('lbGA2',[...ps].sort((a,b)=>b.ga-a.ga).slice(0,8).map(p=>({name:p.name,val:p.ga,sub:p.goals+'G + '+p.assists+'A · '+p.ga90.toFixed(2)+'/90m'})));
-  lb('lbD',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgDrib-a.avgDrib).slice(0,8).map(p=>({name:p.name,val:p.avgDrib.toFixed(1),sub:p.dribbles+' tot · '+p.apps+' pres'})));
-  lb('lbI',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgInt-a.avgInt).slice(0,8).map(p=>({name:p.name,val:p.avgInt.toFixed(1),sub:p.interceptions+' tot'})));
+
   lb('lbSh',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgShots-a.avgShots).slice(0,8).map(p=>({name:p.name,val:p.avgShots.toFixed(1),sub:p.shots+' tot'})));
   lb('lbM',[...ps].sort((a,b)=>b.motm-a.motm).slice(0,8).map(p=>({name:p.name,val:p.motm,sub:p.apps+' pres · '+Math.round(p.motm/p.apps*100)+'% gare'})));
   lb('lbP',[...ps].filter(p=>p.apps>=3&&p.passPct!==null).sort((a,b)=>b.passPct-a.passPct).slice(0,8).map(p=>({name:p.name,val:p.passPct+'%',sub:p.passesmade+'/'+p.passattempts})));
@@ -693,8 +690,7 @@ function openMatch(id){
   const n=m.ps.length||1;
   const avgR=m.ps.reduce((s,p)=>s+p.rating,0)/n;
   const totPass=m.ps.reduce((s,p)=>s+p.passesmade,0);
-  const totDrib=m.ps.reduce((s,p)=>s+p.dribbles,0);
-  const totInt=m.ps.reduce((s,p)=>s+p.interceptions,0);
+
   const totTackles=m.ps.reduce((s,p)=>s+p.tacklesmade,0);
 
   // ── Analisi tattica ──
@@ -730,8 +726,7 @@ function openMatch(id){
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px">'
     +ms2(totPass,'Passaggi riusciti','','#60a5fa')
-    +ms2(totDrib,'Dribbling','','#a78bfa')
-    +ms2(totInt,'Intercetti','','#34d399')
+    
     +ms2(totTackles,'Contrasti vinti','','#f59e0b')
     +'</div>'
 
@@ -783,7 +778,7 @@ function openMatch(id){
     // ── TABELLA STATISTICA ──
     +'<div style="font-size:10px;color:#f5c518;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">📊 Statistiche complete</div>'
     +'<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
-    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">G</th><th class="r">A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">Drib</th><th class="r">Int</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">RC</th>'
+    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">G</th><th class="r">A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">RC</th>'
     +'</tr></thead><tbody>'
     +sorted.map(p=>{
       const rc2=p.rating>=8.5?'hi':p.rating>=7?'me':'lo';
@@ -792,7 +787,7 @@ function openMatch(id){
       +'<td class="r"><span class="'+rc2+'">'+p.rating.toFixed(1)+'</span></td>'
       +'<td class="r">'+(p.goals||'—')+'</td><td class="r">'+(p.assists||'—')+'</td>'
       +'<td class="r"><strong>'+(p.ga||'—')+'</strong></td>'
-      +'<td class="r">'+p.shots+'</td><td class="r">'+p.dribbles+'</td><td class="r">'+p.interceptions+'</td>'
+      +'<td class="r">'+p.shots+'</td>'
       +'<td class="r">'+(p.passPct!==null?p.passPct+'%':'—')+'</td>'
       +'<td class="r">'+(p.tacklePct!==null?p.tacklePct+'%':'—')+'</td>'
       +'<td class="r">'+(p.saves||'—')+'</td>'
@@ -986,14 +981,10 @@ function analyzeMatch(m,avgR){
   else neg.push('Prestazione nel complesso insufficiente: rating medio squadra '+avgR.toFixed(2));
 
   // Dribbling
-  const totDrib=m.ps.reduce((s,p)=>s+p.dribbles,0);
-  if(totDrib>=15) pos.push('Grande dinamismo palla al piede: '+totDrib+' dribbling riusciti — la squadra ha messo in difficoltà gli avversari');
-  else if(totDrib<6) neg.push('Scarsa pericolosità in conduzione: appena '+totDrib+' dribbling completati in tutta la partita');
+
 
   // Intercetti
-  const totInt=m.ps.reduce((s,p)=>s+p.interceptions,0);
-  if(totInt>=10) pos.push('Fase difensiva proattiva: '+totInt+' intercetti totali — ottima lettura delle traiettorie avversarie');
-  else if(totInt<4&&m.ga>=2) neg.push('Fase difensiva passiva: solo '+totInt+' intercetti con '+m.ga+' gol subiti — difficoltà nel leggere il gioco avversario');
+
 
   // Passaggi
   const totPass=m.ps.reduce((s,p)=>s+p.passesmade,0);
@@ -1065,8 +1056,8 @@ function buildPlayerMatchNote(p,m){
   if(p.assists>=2) parts.push('Grande visione di gioco: '+p.assists+' assist distribuiti.');
   else if(p.assists===1) parts.push('Ha fornito un assist decisivo.');
   if(p.shots>=5) parts.push('Molto pericoloso: '+p.shots+' conclusioni verso la porta.');
-  if(p.dribbles>=8) parts.push('Incontenibile palla al piede: '+p.dribbles+' dribbling riusciti.');
-  if(p.interceptions>=5) parts.push('Muro difensivo: '+p.interceptions+' intercetti.');
+
+
   if(p.passPct!==null&&p.passPct>=90) parts.push('Pulizia tecnica di alto livello: '+p.passPct+'% di precisione nei passaggi.');
   else if(p.passPct!==null&&p.passPct<55) parts.push('Molti errori in palleggio: solo '+p.passPct+'% di passaggi riusciti.');
   if(p.saves>=3) parts.push('Decisivo tra i pali: '+p.saves+' parate.');
@@ -1116,7 +1107,7 @@ function openPlayer(name){
     // COL 2: Tecnica
     +'<div style="background:var(--navy);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;font-weight:700">🎯 Tecnica</div>'
     +sr('Tiri tot.',p.shots,p.avgShots.toFixed(1)+'/gara','#7c3aed')
-    +sr('Dribbling tot.',p.dribbles,p.avgDrib.toFixed(1)+'/gara','#f59e0b')
+    
     +sr('Pass riusciti',p.passesmade,p.passattempts+' tentati','#60a5fa')
     +sr('Precisione pass',p.passPct!==null?p.passPct+'%':'—','','#60a5fa')
     +sr('Contrasti %',p.tacklePct!==null?p.tacklePct+'%':'—',p.tacklesmade+'/'+p.tackleattempts,'#f59e0b')
@@ -1124,7 +1115,7 @@ function openPlayer(name){
     +'</div>'
     // COL 3: Difensiva & disciplina
     +'<div style="background:var(--navy);border-radius:10px;padding:12px"><div style="font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;font-weight:700">🛡️ Difesa & disciplina</div>'
-    +sr('Intercetti tot.',p.interceptions,p.avgInt.toFixed(1)+'/gara','#34d399')
+    
     +sr('Clean sheet',p.cleansheets,'','#f5c518')
     +sr('Cartellini rossi',p.redcards,'',p.redcards>0?'#e02020':'#f5c518')
     +sr('Minuti giocati',p.minsPlayed,Math.round(p.minsPlayed/p.apps)+'m/gara','#a8c0e0')
@@ -1229,38 +1220,38 @@ function buildRadar(p){
   }
   if(p.pos==='defender'){
     return{
-      labels:['Intercetti/g','Contrasti%','Clean Sheet','Pass%','Rating','Dribbling/g'],
+      labels:['Contrasti%','Clean Sheet','Pass%','Rating','Tiri/g','G+A tot'],
       values:[
-        n(p.avgInt, capInt),
-        n(p.tacklePct??0, 100),
+        p.tacklePct??0,
         n(p.cleansheets, capCS),
         nPass(p.passPct),
         nRating(p.avgR),
-        n(p.avgDrib, capDrib)
+        n(p.avgShots, capShots),
+        n(p.ga, capGA)
       ]
     };
   }
   if(p.pos==='midfielder'){
     return{
-      labels:['G+A/90m','Pass%','Dribbling/g','Intercetti/g','Rating','Tiri/g'],
+      labels:['G+A/90m','Pass%','Tiri/g','Contrasti%','Rating','G+A tot'],
       values:[
         n(p.ga90, capGA90),
         nPass(p.passPct),
-        n(p.avgDrib, capDrib),
-        n(p.avgInt, capInt),
+        n(p.avgShots, capShots),
+        p.tacklePct??0,
         nRating(p.avgR),
-        n(p.avgShots, capShots)
+        n(p.ga, capGA)
       ]
     };
   }
   // forward / default
   return{
-    labels:['Gol/90m','G+A tot','Tiri/g','Dribbling/g','Rating','Pass%'],
+    labels:['Gol/90m','G+A tot','Tiri/g','Contrasti%','Rating','Pass%'],
     values:[
       n(p.goals90, capGoals90),
       n(p.ga, capGA),
       n(p.avgShots, capShots),
-      n(p.avgDrib, capDrib),
+      p.tacklePct??0,
       nRating(p.avgR),
       nPass(p.passPct)
     ]
@@ -1292,22 +1283,22 @@ function analyzeP(p){
     if(p.ga90>=1.5)S.push('Incisività altissima: '+p.ga90.toFixed(2)+' G+A ogni 90 minuti');
     if(p.avgShots>=3)S.push('Grande presenza nell\'area: '+p.avgShots.toFixed(1)+' tiri/gara');
     else if(p.avgShots<2&&p.apps>=4)W2.push('Pochi tiri ('+p.avgShots.toFixed(1)+'/gara) — deve cercare di più la conclusione');
-    if(p.avgDrib>=10)S.push('Pericoloso palla al piede: '+p.avgDrib.toFixed(1)+' dribbling/gara');
+
   }
   if(pos==='midfielder'){
     if(p.assists>=4)S.push('Regista offensivo: '+p.assists+' assist + '+p.secondAssists+' pre-assist — visione di gioco sopraffina');
-    if(p.avgInt>=3)S.push('Mediano completo: '+p.avgInt.toFixed(1)+' intercetti/gara — copre tanto in fase difensiva');
-    if(p.avgDrib>=12)S.push('Abilità nel dribbling: '+p.avgDrib.toFixed(1)+' dribbling/gara — difficile da marcare');
-    if(p.avgDrib<5&&p.apps>=4)W2.push('Poco propositivo con la palla: solo '+p.avgDrib.toFixed(1)+' dribbling/gara');
+
+
+
     if(p.ga90>=0.8)S.push('Impatto offensivo: '+p.ga90.toFixed(2)+' G+A/90min — non solo interditore');
   }
   if(pos==='defender'){
     if(p.cleansheets>=3)S.push('Pilastro difensivo: protagonista in '+p.cleansheets+' clean sheet');
-    if(p.avgInt>=3.5)S.push('Lettura difensiva ottima: '+p.avgInt.toFixed(1)+' intercetti/gara — difficile da superare');
+
     if(p.tacklePct>=70)S.push('Preciso nei contrasti ('+p.tacklePct+'%) — efficiente 1v1');
     if(p.goals>0)S.push('Difensore con qualità offensive: '+p.goals+' gol segnati — pericoloso su palla inattiva');
     if(p.tacklePct!==null&&p.tacklePct<40)W2.push('Contrasti imprecisi ('+p.tacklePct+'%) — troppi falli commessi');
-    if(p.avgInt<1.5&&p.apps>=4)W2.push('Lettura difensiva da migliorare: '+p.avgInt.toFixed(1)+' intercetti/gara');
+
   }
   // Pass
   if(p.passPct!==null){
@@ -1332,8 +1323,8 @@ function analyzeP(p){
   const tiers={S:'Giocatore di livello assoluto, TITOLARE INAMOVIBILE.',A:'Affidabile e costante: TITOLARE di fiducia.',B:'Buon contributo, ma con margini di crescita importanti.',C:'Profilo in sviluppo: serve più continuità.',D:'Rendimento sotto gli standard richiesti: da monitorare.'};
   const note=tiers[p.tier]+' '+(
     pos==='forward'?p.goals+' gol, '+p.ga90.toFixed(2)+' G+A/90min. '+(p.avgShots>=3?'Ottima presenza in area.':'Deve tirare di più.')+' Win rate '+p.winPct+'%. Consistenza σ='+p.cons.toFixed(2)+'.'
-    :pos==='midfielder'?p.assists+' assist, '+p.avgInt.toFixed(1)+' intercetti/gara, '+p.avgDrib.toFixed(1)+' dribbling/gara. '+(p.passPct!==null?'Pass% '+p.passPct+'%. ':'')+'Win rate '+p.winPct+'%.'
-    :pos==='defender'?p.cleansheets+' clean sheet, '+p.avgInt.toFixed(1)+' intercetti/gara. '+(p.tacklePct!==null?'Contrasti al '+p.tacklePct+'%. ':'')+'Win rate '+p.winPct+'%.'
+    :pos==='midfielder'?p.assists+' assist, pass% '+(p.passPct??0)+'%. Win rate '+p.winPct+'%.'
+    :pos==='defender'?p.cleansheets+' clean sheet. '+(p.tacklePct!==null?'Contrasti al '+p.tacklePct+'%. ':'')+'Win rate '+p.winPct+'%.'
     :'Rating medio '+p.avgR.toFixed(2)+'. '+p.apps+' presenze. Win rate '+p.winPct+'%.'
   );
   return{str:S,weak:W2,note};
