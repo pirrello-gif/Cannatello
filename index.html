@@ -804,15 +804,19 @@ function openMatch(id){
       return '<tr '+(p.motm?'class="motm"':'')+'><td><strong style="color:#e8f0f5">'+p.name+'</strong>'+(p.motm?' ⭐':'')+'</td>'
       +'<td style="color:#8fa8bc;font-size:10px">'+(PLBL[p.pos]||'—')+'</td>'
       +'<td class="r"><span class="'+rc2+'">'+p.rating.toFixed(1)+'</span></td>'
+      +'<td class="r" style="font-size:10px;color:#8fa8bc">'+(p.mins||'—')+'</td>'
       +'<td class="r">'+(p.goals||'—')+'</td><td class="r">'+(p.assists||'—')+'</td>'
       +'<td class="r" style="color:#a78bfa">'+(p.secondAssists||'—')+'</td>'
       +'<td class="r"><strong>'+(p.ga||'—')+'</strong></td>'
       +'<td class="r">'+p.shots+'</td>'
+      +'<td class="r" style="color:#34d399">'+(p.shotsontarget||'—')+'</td>'
       +'<td class="r" style="font-size:10px;color:#c0ccd8">'+(p.passattempts>0?p.passesmade+'<span style="color:var(--mid)">\/'+p.passattempts+'</span>':'—')+'</td>'
       +'<td class="r">'+(p.passPct!==null?p.passPct+'%':'—')+'</td>'
       +'<td class="r">'+(p.tacklePct!==null?p.tacklePct+'%':'—')+'</td>'
       +'<td class="r">'+(p.saves||'—')+'</td>'
+      +'<td class="r" style="color:#facc15">'+(p.yellowcards?'🟨':'—')+'</td>'
       +'<td class="r">'+(p.redcards?'<span style="color:#e02020;font-weight:700">🟥</span>':'—')+'</td>'
+      +'<td class="r" style="font-size:10px;color:#8fa8bc">'+(p.offsides||'—')+'</td>'
       +'</tr>';
     }).join('')+'</tbody></table></div>';
 
