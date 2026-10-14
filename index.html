@@ -797,7 +797,7 @@ function openMatch(id){
     // ── TABELLA STATISTICA ──
     +'<div style="font-size:10px;color:#f5c518;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">📊 Statistiche complete</div>'
     +'<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
-    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">Min</th><th class="r">G</th><th class="r">A</th><th class="r">2A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">In porta</th><th class="r">Pass</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">GI</th><th class="r">RC</th><th class="r">FG</th></tr>'
+    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">Min</th><th class="r">G</th><th class="r">A</th><th class="r">2A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">In porta</th><th class="r">Pass</th><th class="r">Pass%</th><th class="r">Tck</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">GI</th><th class="r">RC</th><th class="r">FG</th></tr>'
     +'</tr></thead><tbody>'
     +sorted.map(p=>{
       const rc2=p.rating>=8.5?'hi':p.rating>=7?'me':'lo';
@@ -812,6 +812,7 @@ function openMatch(id){
       +'<td class="r" style="color:#34d399">'+(p.shotsontarget||'—')+'</td>'
       +'<td class="r" style="font-size:10px;color:#c0ccd8">'+(p.passattempts>0?p.passesmade+'<span style="color:var(--mid)">\/'+p.passattempts+'</span>':'—')+'</td>'
       +'<td class="r">'+(p.passPct!==null?p.passPct+'%':'—')+'</td>'
+      +'<td class="r" style="font-size:10px;color:#c0ccd8">'+(p.tackleattempts>0?p.tacklesmade+'<span style="color:var(--mid)">\/'+p.tackleattempts+'</span>':'—')+'</td>'
       +'<td class="r">'+(p.tacklePct!==null?p.tacklePct+'%':'—')+'</td>'
       +'<td class="r">'+(p.saves||'—')+'</td>'
       +'<td class="r" style="color:#facc15">'+(p.yellowcards?'🟨':'—')+'</td>'
