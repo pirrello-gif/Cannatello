@@ -186,6 +186,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
     <button class="fb active" onclick="fmatch('all',this)">Tutte</button>
     <button class="fb" onclick="fmatch('leagueMatch',this)">Campionato</button>
     <button class="fb" onclick="fmatch('playoffMatch',this)">Playoff</button>
+    <button class="fb" onclick="fmatch('friendlyMatch',this)">Amichevoli</button>
     <button class="fb" onclick="fmatch('W',this)">Vittorie</button>
     <button class="fb" onclick="fmatch('L',this)">Sconfitte</button>
     <button class="fb" onclick="fmatch('D',this)">Pareggi</button>
@@ -244,7 +245,7 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
         <div style="font-size:13px;color:#c8d6e0;margin-bottom:14px;line-height:1.7">
           Incolla qui il JSON dell'API EA dopo ogni sessione di gioco.<br>
           <span style="color:#8a9ab0;font-size:11px">🏅 Campionato: proclubs.ea.com/api/fc/clubs/matches?matchType=leagueMatch&platform=common-gen5&clubIds=552863&maxResultCount=20<br>
-          🏆 Playoff: proclubs.ea.com/api/fc/clubs/matches?matchType=playoffMatch&platform=common-gen5&clubIds=552863&maxResultCount=20</span>
+          🏆 Playoff: proclubs.ea.com/api/fc/clubs/matches?matchType=playoffMatch&platform=common-gen5&clubIds=552863&maxResultCount=20<br>🤝 Amichevole: proclubs.ea.com/api/fc/clubs/matches?matchType=friendlyMatch&platform=common-gen5&clubIds=552863&maxResultCount=20</span>
         </div>
         <div style="margin-bottom:14px">
           <label style="font-size:11px;color:#8a9ab0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Password</label>
@@ -264,6 +265,10 @@ body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:var(--text);min-he
           <button onclick="setImportType('league')" id="btnLeague"
             style="background:#cc1a1a;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">
             🏅 Campionato
+          </button>
+          <button onclick="setImportType('friendly')" id="btnFriendly"
+          style="background:#1a1010;color:#8a9ab0;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px;font-family:'Barlow Condensed';font-size:15px;font-weight:700;cursor:pointer;flex:1">
+            🤝 Amichevole
           </button>
           <button onclick="setImportType('playoff')" id="btnPlayoff"
             style="background:#1a1010;border:1px solid rgba(255,255,255,.15);color:#8a9ab0;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">
@@ -378,11 +383,12 @@ function parseMat(raw){
     const tshots=ps.reduce((s,p)=>s+p.shots,0);
     // match_type: EA uses matchType field inside clubs obj or top-level
     const isPlayoff=m._isPlayoff===true;
+    const isFriendly=m._isFriendly===true;
     const oppName=opp.details?.name||'Club '+oid;
     return{id:matchId,ts,
       date:ts?new Date(ts*1000).toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}):'?',
-      type:isPlayoff?'playoffMatch':'leagueMatch',
-      tlabel:isPlayoff?'🏆 Playoff':'🏅 Camp.',
+      type:isPlayoff?'playoffMatch':isFriendly?'friendlyMatch':'leagueMatch',
+      tlabel:isPlayoff?'🏆 Playoff':isFriendly?'🤝 Amich.':'🏅 Camp.',
       opp:oppName,score:gf+'-'+ga,gf,ga,res,dnf:dW||dL,
       shots:tshots,shotConv:tshots>0?Math.round(gf/tshots*100):0,ps};
   }).filter(Boolean).sort((a,b)=>b.ts-a.ts);
@@ -466,7 +472,7 @@ function renderKPIs(){
     {v:avgR,l:'Rating medio sq.',s:'tutte le gare'},
     {v:plW+'/'+pl.length,l:'Playoff vinti',s:(pl.length?Math.round(plW/pl.length*100):0)+'% win rate'},
     {v:sc.text,l:'Serie attuale',s:sc.sub},
-    {v:AM.length,l:'Partite tot.',s:AM.filter(m=>m.type==='leagueMatch').length+' camp · '+pl.length+' playoff'},
+    {v:AM.length,l:'Partite tot.',s:AM.filter(m=>m.type==='leagueMatch').length+' camp · '+pl.length+' playoff · '+AM.filter(m=>m.type==='friendlyMatch').length+' amich.'},
   ];
   document.getElementById('kstrip').innerHTML=items.map(k=>'<div class="kpi"><div class="kv">'+k.v+'</div><div class="kl">'+k.l+'</div><div class="ks">'+k.s+'</div></div>').join('');
 }
@@ -854,9 +860,12 @@ function setImportType(t){
   document.getElementById('btnLeague').style.background=t==='league'?'#cc1a1a':'#1a1010';
   document.getElementById('btnLeague').style.color=t==='league'?'#fff':'#8a9ab0';
   document.getElementById('btnLeague').style.border=t==='league'?'none':'1px solid rgba(255,255,255,.15)';
-  document.getElementById('btnPlayoff').style.background=t==='playoff'?'#cc1a1a':'#1a1010';
-  document.getElementById('btnPlayoff').style.color=t==='playoff'?'#fff':'#8a9ab0';
-  document.getElementById('btnPlayoff').style.border=t==='playoff'?'none':'1px solid rgba(255,255,255,.15)';
+  const btnC=document.getElementById('btnCampionato');
+  const btnP=document.getElementById('btnPlayoff');
+  const btnF=document.getElementById('btnFriendly');
+  [btnC,btnP,btnF].forEach(b=>{if(b){b.style.background='#1a1010';b.style.color='#8a9ab0';b.style.border='1px solid rgba(255,255,255,.15)';}});
+  const active=t==='league'?btnC:t==='playoff'?btnP:btnF;
+  if(active){active.style.background='#cc1a1a';active.style.color='#fff';active.style.border='none';}
 }
 
 async function importJson(){
@@ -876,7 +885,8 @@ async function importJson(){
 
   // Tag con tipo partita e merge con dati esistenti
   const isPlayoff=importType==='playoff';
-  const tagged=data.map(m=>({...m,_isPlayoff:isPlayoff}));
+  const isFriendly=importType==='friendly';
+  const tagged=data.map(m=>({...m,_isPlayoff:isPlayoff,_isFriendly:isFriendly}));
 
   // Parsing delle nuove partite
   const newMatches=parseMat(tagged);
