@@ -370,6 +370,9 @@ function parseMat(raw){
         shots:parseInt(p.shots||0),saves:parseInt(p.saves||0),
         dribbles:parseInt(p.dribbles||0),interceptions:parseInt(p.interceptions||0),
         redcards:parseInt(p.redcards||0),
+        yellowcards:parseInt(p.yellowcards||0),
+        offsides:parseInt(p.offsides||0),
+        shotsontarget:parseInt(p.shotsontarget||0),
         passesmade:pm,passattempts:pa,tacklesmade:tm,tackleattempts:ta,
         passPct:pa>0?Math.round(pm/pa*100):null,
         tacklePct:ta>0?Math.round(tm/ta*100):null,
@@ -402,7 +405,7 @@ function buildStats(matches){
   matches.forEach(m=>{
     m.ps.forEach(p=>{
       if(!a[p.name])a[p.name]={name:p.name,pos:p.pos,apps:0,goals:0,assists:0,ga:0,
-        shots:0,saves:0,dribbles:0,interceptions:0,redcards:0,
+        shots:0,saves:0,dribbles:0,interceptions:0,redcards:0,yellowcards:0,offsides:0,shotsontarget:0,secondAssists:0,cleansheets:0,
         passesmade:0,passattempts:0,tacklesmade:0,tackleattempts:0,
         secondAssists:0,cleansheets:0,motm:0,rSum:0,rCount:0,minsPlayed:0,wins:0,
         dcoCount:0,ratings:[],hist:[],matchRatings:[]};
@@ -411,6 +414,9 @@ function buildStats(matches){
       x.apps++;x.goals+=p.goals;x.assists+=p.assists;x.ga+=p.ga;
       x.shots+=p.shots;x.saves+=p.saves;x.dribbles+=p.dribbles;
       x.interceptions+=p.interceptions;x.redcards+=p.redcards;
+      x.yellowcards+=p.yellowcards;x.offsides+=p.offsides;
+      x.shotsontarget+=p.shotsontarget;x.secondAssists+=p.secondAssists;
+      x.cleansheets+=p.cleansheet;
       x.passesmade+=p.passesmade;x.passattempts+=p.passattempts;
       x.tacklesmade+=p.tacklesmade;x.tackleattempts+=p.tackleattempts;
       x.secondAssists+=p.secondAssists;x.cleansheets+=p.cleansheet;
@@ -431,6 +437,10 @@ function buildStats(matches){
     x.tacklePct=x.tackleattempts>0?Math.round(x.tacklesmade/x.tackleattempts*100):null;
     x.avgDrib=x.apps?x.dribbles/x.apps:0;
     x.avgInt=x.apps?x.interceptions/x.apps:0;
+    x.avgShots=x.apps?x.shots/x.apps:0;
+    x.avgSaves=x.apps?x.saves/x.apps:0;
+    x.avgSot=x.apps?x.shotsontarget/x.apps:0;
+    x.shotAccuracy=x.shots>0?Math.round(x.shotsontarget/x.shots*100):null;
     x.avgShots=x.apps?x.shots/x.apps:0;
     x.ga90=x.minsPlayed>0?(x.ga/x.minsPlayed*90):0;
     x.goals90=x.minsPlayed>0?(x.goals/x.minsPlayed*90):0;
@@ -633,6 +643,9 @@ function renderLeaderboards(){
   lb('lbSh',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.avgShots-a.avgShots).slice(0,8).map(p=>({name:p.name,val:p.avgShots.toFixed(1),sub:p.shots+' tot'})));
   lb('lbM',[...ps].sort((a,b)=>b.motm-a.motm).slice(0,8).map(p=>({name:p.name,val:p.motm,sub:p.apps+' pres · '+Math.round(p.motm/p.apps*100)+'% gare'})));
   lb('lbP',[...ps].filter(p=>p.apps>=3&&p.passPct!==null).sort((a,b)=>b.passPct-a.passPct).slice(0,8).map(p=>({name:p.name,val:p.passPct+'%',sub:p.passesmade+'/'+p.passattempts})));
+  lb('lbSav',[...ps].filter(p=>p.apps>=3&&p.saves>0).sort((a,b)=>b.avgSaves-a.avgSaves).slice(0,8).map(p=>({name:p.name,val:p.avgSaves.toFixed(1),sub:p.saves+' tot · '+p.apps+' pres'})));
+  lb('lbSA',[...ps].filter(p=>p.apps>=3&&p.secondAssists>0).sort((a,b)=>b.secondAssists-a.secondAssists).slice(0,8).map(p=>({name:p.name,val:p.secondAssists,sub:(p.secondAssists/p.apps).toFixed(2)+'/gara'})));
+  lb('lbSot',[...ps].filter(p=>p.apps>=3&&p.shotAccuracy!==null).sort((a,b)=>b.shotAccuracy-a.shotAccuracy).slice(0,8).map(p=>({name:p.name,val:p.shotAccuracy+'%',sub:p.shotsontarget+' in porta · '+p.shots+' tot'})));
   lb('lbGA90',[...ps].filter(p=>p.apps>=3).sort((a,b)=>b.ga90-a.ga90).slice(0,8).map(p=>({name:p.name,val:p.ga90.toFixed(2),sub:p.minsPlayed+' min giocati'})));
 }
 
@@ -784,7 +797,7 @@ function openMatch(id){
     // ── TABELLA STATISTICA ──
     +'<div style="font-size:10px;color:#f5c518;text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:10px">📊 Statistiche complete</div>'
     +'<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
-    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">G</th><th class="r">A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">RC</th>'
+    +'<th>Giocatore</th><th>Pos</th><th class="r">Voto</th><th class="r">Min</th><th class="r">G</th><th class="r">A</th><th class="r">2A</th><th class="r">G+A</th><th class="r">Tiri</th><th class="r">In porta</th><th class="r">Pass</th><th class="r">Pass%</th><th class="r">Tck%</th><th class="r">Sav</th><th class="r">GI</th><th class="r">RC</th><th class="r">FG</th></tr>'
     +'</tr></thead><tbody>'
     +sorted.map(p=>{
       const rc2=p.rating>=8.5?'hi':p.rating>=7?'me':'lo';
@@ -792,8 +805,10 @@ function openMatch(id){
       +'<td style="color:#8fa8bc;font-size:10px">'+(PLBL[p.pos]||'—')+'</td>'
       +'<td class="r"><span class="'+rc2+'">'+p.rating.toFixed(1)+'</span></td>'
       +'<td class="r">'+(p.goals||'—')+'</td><td class="r">'+(p.assists||'—')+'</td>'
+      +'<td class="r" style="color:#a78bfa">'+(p.secondAssists||'—')+'</td>'
       +'<td class="r"><strong>'+(p.ga||'—')+'</strong></td>'
       +'<td class="r">'+p.shots+'</td>'
+      +'<td class="r" style="font-size:10px;color:#c0ccd8">'+(p.passattempts>0?p.passesmade+'<span style="color:var(--mid)">\/'+p.passattempts+'</span>':'—')+'</td>'
       +'<td class="r">'+(p.passPct!==null?p.passPct+'%':'—')+'</td>'
       +'<td class="r">'+(p.tacklePct!==null?p.tacklePct+'%':'—')+'</td>'
       +'<td class="r">'+(p.saves||'—')+'</td>'
@@ -1119,6 +1134,8 @@ function openPlayer(name){
     +sr('Tiri tot.',p.shots,p.avgShots.toFixed(1)+'/gara','#7c3aed')
     
     +sr('Pass riusciti',p.passesmade,p.passattempts+' tentati','#60a5fa')
+    +sr('Tiri in porta',p.shotsontarget,(p.shotAccuracy!==null?p.shotAccuracy+'% precisione':''),'#34d399')
+    +sr('Pre-assist',p.secondAssists,p.apps>0?(p.secondAssists/p.apps).toFixed(1)+'/gara':'','#a78bfa')
     +sr('Precisione pass',p.passPct!==null?p.passPct+'%':'—','','#60a5fa')
     +sr('Contrasti %',p.tacklePct!==null?p.tacklePct+'%':'—',p.tacklesmade+'/'+p.tackleattempts,'#f59e0b')
     +(p.saves?sr('Parate',p.saves,'','#60a5fa'):'')
